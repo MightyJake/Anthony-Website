@@ -143,24 +143,6 @@
     color: var(--accent); font-size: 0.7rem;
   }
 
-  /* ---------- TICKETS ---------- */
-  .ticket-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; }
-  .ticket-card {
-    background: var(--card); border: 1px solid var(--border); border-radius: 18px;
-    padding: 34px 28px; text-align: center; box-shadow: var(--shadow);
-    transition: transform 0.3s, box-shadow 0.3s; position: relative; overflow: hidden;
-  }
-  .ticket-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); }
-  .ticket-card.featured { border-color: var(--accent); border-width: 2px; }
-  .ticket-card .tier { font-family: 'Cormorant Garamond', serif; font-size: 1.7rem; margin-bottom: 6px; }
-  .ticket-card .price { font-size: 2.6rem; font-family: 'Cormorant Garamond', serif; font-weight: 600; }
-  .ticket-card .price span { font-size: 1rem; color: var(--ink-soft); font-family: 'Outfit'; }
-  .ticket-card ul { list-style: none; margin: 22px 0; text-align: left; }
-  .ticket-card li { padding: 7px 0; color: var(--ink-soft); font-size: 0.92rem; border-bottom: 1px solid var(--border); }
-  .ticket-card li::before { content: "✦  "; color: var(--accent); }
-  .badge { position: absolute; top: 16px; right: -34px; background: var(--accent); color: var(--on-accent);
-    font-size: 0.68rem; letter-spacing: 0.15em; padding: 5px 40px; transform: rotate(45deg); text-transform: uppercase; }
-
   /* ---------- EVENTS ---------- */
   .events-bar { display: flex; justify-content: flex-end; margin-bottom: 20px; }
   .admin-link { font-size: 0.82rem; color: var(--ink-soft); cursor: pointer; text-decoration: none; border: 1px solid var(--border); padding: 7px 16px; border-radius: 100px; transition: all 0.2s; }
@@ -201,13 +183,20 @@
   }
   .gallery img { width: 100%; display: block; transition: transform 0.5s, filter 0.4s; filter: saturate(0.9); }
   .gallery figure:hover img { transform: scale(1.06); filter: saturate(1.1); }
-  .gallery figcaption {
-    position: absolute; inset: auto 0 0 0; padding: 30px 16px 14px;
-    background: linear-gradient(transparent, rgba(0,23,55,0.85));
-    color: #f4f1ea; font-family: 'Cormorant Garamond', serif; font-size: 1.2rem;
-    opacity: 0; transition: opacity 0.3s;
+
+  /* ---------- REVIEWS ---------- */
+  .review-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; }
+  .review-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 18px;
+    padding: 32px 28px; box-shadow: var(--shadow); position: relative;
+    transition: transform 0.3s, box-shadow 0.3s; display: flex; flex-direction: column;
   }
-  .gallery figure:hover figcaption { opacity: 1; }
+  .review-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); }
+  .review-card .quote-mark { font-family: 'Cormorant Garamond', serif; font-size: 3.4rem; line-height: 0.6; color: var(--accent); opacity: 0.35; margin-bottom: 6px; }
+  .review-card .stars { color: var(--accent); letter-spacing: 0.18em; font-size: 0.95rem; margin-bottom: 14px; }
+  .review-card blockquote { font-family: 'Cormorant Garamond', serif; font-size: 1.22rem; line-height: 1.45; color: var(--ink); font-style: italic; margin-bottom: 20px; flex: 1; }
+  .review-card .reviewer { font-size: 0.9rem; font-weight: 500; color: var(--ink); }
+  .review-card .reviewer span { display: block; font-weight: 400; font-size: 0.8rem; color: var(--ink-soft); letter-spacing: 0.02em; margin-top: 2px; }
 
   /* ---------- CONTACT ---------- */
   .contact-wrap { max-width: 640px; margin: 0 auto; background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 44px; box-shadow: var(--shadow); }
@@ -279,8 +268,8 @@
     <a href="#top" class="nav-logo" aria-label="Anthony Magic home"><svg><use href="#amlogo"/></svg></a>
     <div class="nav-links" id="navLinks">
       <a href="#events">Events</a>
-      <a href="#tickets">Tickets</a>
       <a href="#gallery">Gallery</a>
+      <a href="#reviews">Reviews</a>
       <a href="#contact">Contact</a>
       <button class="theme-btn" id="themeBtn" aria-label="Toggle theme">☾</button>
     </div>
@@ -293,8 +282,8 @@
   <div class="hero-logo"><svg><use href="#amlogo"/></svg></div>
   <p class="hero-tag">Close-up wonder &amp; stage illusion</p>
   <div class="hero-cta">
-    <a href="#tickets" class="btn btn-primary">Get Tickets</a>
-    <a href="#contact" class="btn btn-ghost">Book a Show</a>
+    <a href="#contact" class="btn btn-primary">Book a Show</a>
+    <a href="#gallery" class="btn btn-ghost">View Gallery</a>
   </div>
 </header>
 
@@ -324,38 +313,6 @@
   </div>
 </section>
 
-<!-- TICKETS -->
-<section class="block" id="tickets">
-  <div class="container">
-    <div class="section-head">
-      <span class="eyebrow">Reserve your seat</span>
-      <h2>Tickets</h2>
-      <div class="divider"></div>
-    </div>
-    <div class="ticket-grid">
-      <div class="ticket-card">
-        <div class="tier">The Curious</div>
-        <div class="price">$25 <span>/ seat</span></div>
-        <ul><li>General admission</li><li>Full 90-minute show</li><li>Open seating</li></ul>
-        <button class="btn btn-ghost buy-btn" data-tier="The Curious — $25">Select</button>
-      </div>
-      <div class="ticket-card featured">
-        <div class="badge">Best</div>
-        <div class="tier">The Believer</div>
-        <div class="price">$45 <span>/ seat</span></div>
-        <ul><li>Front-row reserved seat</li><li>Post-show meet &amp; greet</li><li>Signed playing card</li></ul>
-        <button class="btn btn-primary buy-btn" data-tier="The Believer — $45">Select</button>
-      </div>
-      <div class="ticket-card">
-        <div class="tier">The Inner Circle</div>
-        <div class="price">$80 <span>/ seat</span></div>
-        <ul><li>Private close-up session</li><li>VIP reserved seating</li><li>Souvenir &amp; drink included</li></ul>
-        <button class="btn btn-ghost buy-btn" data-tier="The Inner Circle — $80">Select</button>
-      </div>
-    </div>
-  </div>
-</section>
-
 <!-- GALLERY -->
 <section class="block" id="gallery" style="background:var(--bg-alt)">
   <div class="container">
@@ -365,12 +322,43 @@
       <div class="divider"></div>
     </div>
     <div class="gallery" id="gallery">
-      <figure><img src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=600&q=80" alt="Cards in mid-air"><figcaption>The Reveal</figcaption></figure>
-      <figure><img src="https://images.unsplash.com/photo-1606166187734-a4cb74079037?w=600&q=80" alt="Playing cards"><figcaption>Sleight of Hand</figcaption></figure>
-      <figure><img src="https://images.unsplash.com/photo-1635868521025-c3a40f53c660?w=600&q=80" alt="Stage lights"><figcaption>Center Stage</figcaption></figure>
-      <figure><img src="https://images.unsplash.com/photo-1542204165-65bf26472b9b?w=600&q=80" alt="Top hat"><figcaption>Classic Wonder</figcaption></figure>
-      <figure><img src="https://images.unsplash.com/photo-1601758174114-e711c0cbaa69?w=600&q=80" alt="Spotlight"><figcaption>The Spotlight</figcaption></figure>
-      <figure><img src="https://images.unsplash.com/photo-1572177812156-58036aae439c?w=600&q=80" alt="Crowd"><figcaption>A Captivated Crowd</figcaption></figure>
+      <figure><img src="imgs/Anthony_Stage.png" alt="Cards in mid-air"></figure>
+      <figure><img src="imgs/Anthony_Stage.png" alt="Playing cards"></figure>
+      <figure><img src="imgs/Anthony_Stage.png" alt="Stage lights"></figure>
+      <figure><img src="imgs/Anthony_Stage.png" alt="Top hat"></figure>
+      <figure><img src="imgs/Anthony_Stage.png" alt="Spotlight"></figure>
+      <figure><img src="imgs/Anthony_Stage.png" alt="Crowd"></figure>
+    </div>
+  </div>
+</section>
+
+<!-- REVIEWS -->
+<section class="block" id="reviews">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">Kind words</span>
+      <h2>Reviews</h2>
+      <div class="divider"></div>
+    </div>
+    <div class="review-grid">
+      <div class="review-card">
+        <div class="quote-mark">&ldquo;</div>
+        <div class="stars">★★★★★</div>
+        <blockquote>Anthony had our entire dinner party speechless. The card work inches from our faces was simply impossible — we're still arguing about how he did it.</blockquote>
+        <div class="reviewer">Marisa Holloway<span>Private party · Portland, OR</span></div>
+      </div>
+      <div class="review-card">
+        <div class="quote-mark">&ldquo;</div>
+        <div class="stars">★★★★★</div>
+        <blockquote>We booked Anthony for our company gala and he completely stole the night. Polished, funny, and genuinely jaw-dropping. Worth every penny.</blockquote>
+        <div class="reviewer">Devon Park<span>Corporate event · Seattle, WA</span></div>
+      </div>
+      <div class="review-card">
+        <div class="quote-mark">&ldquo;</div>
+        <div class="stars">★★★★★</div>
+        <blockquote>The stage show was pure wonder from start to finish. My kids were mesmerized and so were the adults. A magician who actually makes you believe again.</blockquote>
+        <div class="reviewer">Elena Vásquez<span>Theater show · Vancouver, WA</span></div>
+      </div>
     </div>
   </div>
 </section>
@@ -403,20 +391,6 @@
     <p>&copy; <span id="yr"></span> Anthony Magic · Prepare to be amazed</p>
   </div>
 </footer>
-
-<!-- TICKET MODAL -->
-<div class="modal-bg" id="ticketModal">
-  <div class="modal">
-    <button class="close-x" data-close>&times;</button>
-    <h3>Reserve Tickets</h3>
-    <p id="modalTier"></p>
-    <div class="field"><label>Name</label><input type="text" id="tName"></div>
-    <div class="field"><label>Email</label><input type="email" id="tEmail"></div>
-    <div class="field"><label>Quantity</label><input type="number" id="tQty" value="1" min="1" max="10"></div>
-    <button class="btn btn-primary" id="tConfirm" style="width:100%">Confirm &amp; Pay</button>
-    <div class="form-msg" id="tMsg">✦ Reserved! A confirmation is on its way.</div>
-  </div>
-</div>
 
 <!-- LOGIN MODAL -->
 <div class="modal-bg" id="loginModal">
@@ -532,21 +506,6 @@
   function closeModal(m) { m.classList.remove('open'); }
   document.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', e => closeModal(e.target.closest('.modal-bg'))));
   document.querySelectorAll('.modal-bg').forEach(m => m.addEventListener('click', e => { if (e.target === m) closeModal(m); }));
-
-  // ---------- TICKETS ----------
-  const ticketModal = document.getElementById('ticketModal');
-  document.querySelectorAll('.buy-btn').forEach(b => b.addEventListener('click', () => {
-    document.getElementById('modalTier').textContent = b.dataset.tier;
-    document.getElementById('tMsg').classList.remove('show');
-    openModal(ticketModal);
-  }));
-  document.getElementById('tConfirm').addEventListener('click', () => {
-    const n = document.getElementById('tName').value.trim();
-    const em = document.getElementById('tEmail').value.trim();
-    if (!n || !em) { alert('Please enter your name and email.'); return; }
-    document.getElementById('tMsg').classList.add('show');
-    setTimeout(() => closeModal(ticketModal), 1800);
-  });
 
   // ---------- CONTACT ----------
   document.getElementById('contactSend').addEventListener('click', () => {
