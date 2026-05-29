@@ -1,0 +1,574 @@
+<!-- Anthony Magic — single-file site -->
+<style>
+  :root {
+    --navy: #001737;
+    --navy-soft: #1a2c4a;
+    --bg: #f4f1ea;
+    --bg-alt: #ebe6db;
+    --ink: #001737;
+    --ink-soft: #4a5568;
+    --card: #ffffff;
+    --border: rgba(0, 23, 55, 0.12);
+    --accent: #001737;
+    --on-accent: #f4f1ea;
+    --shadow: 0 8px 30px rgba(0, 23, 55, 0.08);
+    --shadow-lg: 0 20px 60px rgba(0, 23, 55, 0.14);
+  }
+  [data-theme="dark"] {
+    --bg: #050b1a;
+    --bg-alt: #0a1428;
+    --ink: #e9eef7;
+    --ink-soft: #95a3bd;
+    --card: #0d1a33;
+    --border: rgba(233, 238, 247, 0.12);
+    --accent: #e9eef7;
+    --on-accent: #001737;
+    --shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.55);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Outfit:wght@300;400;500;600&display=swap');
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Outfit', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    transition: background 0.4s ease, color 0.4s ease;
+    overflow-x: hidden;
+  }
+
+  /* subtle starfield texture */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-image:
+      radial-gradient(1px 1px at 20% 30%, var(--border), transparent),
+      radial-gradient(1px 1px at 70% 60%, var(--border), transparent),
+      radial-gradient(1px 1px at 40% 80%, var(--border), transparent),
+      radial-gradient(2px 2px at 85% 20%, var(--border), transparent);
+    background-size: 100% 100%;
+    opacity: 0.5;
+  }
+
+  h1, h2, h3, .display {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 600;
+    line-height: 1.1;
+  }
+
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+
+  /* ---------- NAV ---------- */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: color-mix(in srgb, var(--bg) 82%, transparent);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-inner {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 24px; max-width: 1100px; margin: 0 auto;
+  }
+  .nav-logo { height: 34px; color: var(--ink); display: flex; align-items: center; }
+  .nav-logo svg { height: 100%; width: auto; fill: currentColor; }
+  .nav-links { display: flex; gap: 28px; align-items: center; }
+  .nav-links a {
+    color: var(--ink-soft); text-decoration: none; font-size: 0.9rem;
+    font-weight: 400; letter-spacing: 0.02em; transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--ink); }
+  .theme-btn {
+    background: none; border: 1px solid var(--border); color: var(--ink);
+    width: 38px; height: 38px; border-radius: 50%; cursor: pointer;
+    display: grid; place-items: center; transition: all 0.25s; font-size: 1rem;
+  }
+  .theme-btn:hover { background: var(--card); transform: rotate(20deg); }
+  .menu-toggle { display: none; background: none; border: none; color: var(--ink); cursor: pointer; }
+
+  /* ---------- HERO ---------- */
+  .hero {
+    min-height: 88vh; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; text-align: center;
+    padding: 60px 24px; position: relative;
+  }
+  .hero-logo {
+    width: min(440px, 80vw); color: var(--ink); margin-bottom: 32px;
+    animation: rise 1s cubic-bezier(.16,1,.3,1) both;
+  }
+  .hero-logo svg { width: 100%; height: auto; fill: currentColor; }
+  .hero-tag {
+    font-family: 'Cormorant Garamond', serif; font-style: italic;
+    font-size: clamp(1.4rem, 3vw, 2rem); color: var(--ink-soft);
+    margin-bottom: 36px; animation: rise 1s 0.15s cubic-bezier(.16,1,.3,1) both;
+  }
+  .hero-cta { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center;
+    animation: rise 1s 0.3s cubic-bezier(.16,1,.3,1) both; }
+
+  @keyframes rise { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
+
+  .btn {
+    padding: 13px 30px; border-radius: 100px; font-family: 'Outfit', sans-serif;
+    font-size: 0.92rem; font-weight: 500; letter-spacing: 0.03em; cursor: pointer;
+    text-decoration: none; display: inline-block; transition: all 0.25s; border: 1px solid var(--accent);
+  }
+  .btn-primary { background: var(--accent); color: var(--on-accent); }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+  .btn-ghost { background: transparent; color: var(--ink); }
+  .btn-ghost:hover { background: var(--card); transform: translateY(-2px); }
+
+  /* ---------- SECTIONS ---------- */
+  section.block { padding: 90px 0; position: relative; }
+  .section-head { text-align: center; margin-bottom: 50px; }
+  .section-head .eyebrow {
+    font-size: 0.78rem; letter-spacing: 0.25em; text-transform: uppercase;
+    color: var(--ink-soft); display: block; margin-bottom: 10px;
+  }
+  .section-head h2 { font-size: clamp(2.2rem, 5vw, 3.4rem); }
+  .divider {
+    width: 60px; height: 1px; background: var(--accent); margin: 18px auto 0;
+    position: relative;
+  }
+  .divider::after {
+    content: "✦"; position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%); background: var(--bg); padding: 0 8px;
+    color: var(--accent); font-size: 0.7rem;
+  }
+
+  /* ---------- TICKETS ---------- */
+  .ticket-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; }
+  .ticket-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 18px;
+    padding: 34px 28px; text-align: center; box-shadow: var(--shadow);
+    transition: transform 0.3s, box-shadow 0.3s; position: relative; overflow: hidden;
+  }
+  .ticket-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); }
+  .ticket-card.featured { border-color: var(--accent); border-width: 2px; }
+  .ticket-card .tier { font-family: 'Cormorant Garamond', serif; font-size: 1.7rem; margin-bottom: 6px; }
+  .ticket-card .price { font-size: 2.6rem; font-family: 'Cormorant Garamond', serif; font-weight: 600; }
+  .ticket-card .price span { font-size: 1rem; color: var(--ink-soft); font-family: 'Outfit'; }
+  .ticket-card ul { list-style: none; margin: 22px 0; text-align: left; }
+  .ticket-card li { padding: 7px 0; color: var(--ink-soft); font-size: 0.92rem; border-bottom: 1px solid var(--border); }
+  .ticket-card li::before { content: "✦  "; color: var(--accent); }
+  .badge { position: absolute; top: 16px; right: -34px; background: var(--accent); color: var(--on-accent);
+    font-size: 0.68rem; letter-spacing: 0.15em; padding: 5px 40px; transform: rotate(45deg); text-transform: uppercase; }
+
+  /* ---------- EVENTS ---------- */
+  .events-bar { display: flex; justify-content: flex-end; margin-bottom: 20px; }
+  .admin-link { font-size: 0.82rem; color: var(--ink-soft); cursor: pointer; text-decoration: none; border: 1px solid var(--border); padding: 7px 16px; border-radius: 100px; transition: all 0.2s; }
+  .admin-link:hover { color: var(--ink); background: var(--card); }
+  .event-list { display: flex; flex-direction: column; gap: 14px; max-width: 800px; margin: 0 auto; }
+  .event-item {
+    background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+    padding: 22px 26px; display: flex; align-items: center; gap: 24px;
+    box-shadow: var(--shadow); transition: transform 0.2s;
+  }
+  .event-item:hover { transform: translateX(4px); }
+  .event-date {
+    text-align: center; flex-shrink: 0; min-width: 64px;
+    border-right: 1px solid var(--border); padding-right: 22px;
+  }
+  .event-date .day { font-family: 'Cormorant Garamond', serif; font-size: 2rem; font-weight: 600; line-height: 1; }
+  .event-date .mon { font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-soft); }
+  .event-body { flex: 1; }
+  .event-body h3 { font-size: 1.4rem; margin-bottom: 2px; }
+  .event-body p { color: var(--ink-soft); font-size: 0.9rem; }
+  .event-del { background: none; border: none; color: var(--ink-soft); cursor: pointer; font-size: 1.2rem; opacity: 0; transition: opacity 0.2s, color 0.2s; }
+  .event-item:hover .event-del { opacity: 1; }
+  .event-del:hover { color: #c0392b; }
+  .empty-note { text-align: center; color: var(--ink-soft); font-style: italic; padding: 30px; font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; }
+
+  /* admin add row */
+  .admin-panel { max-width: 800px; margin: 0 auto 22px; background: var(--card); border: 1px dashed var(--accent); border-radius: 14px; padding: 22px; display: none; }
+  .admin-panel.open { display: block; animation: rise 0.4s ease; }
+  .admin-panel h4 { font-family: 'Outfit'; font-weight: 600; font-size: 0.82rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 14px; }
+  .admin-row { display: grid; grid-template-columns: 130px 1fr 1fr auto; gap: 10px; align-items: end; }
+  .logout-link { font-size: 0.78rem; color: var(--ink-soft); cursor: pointer; margin-left: 12px; text-decoration: underline; }
+
+  /* ---------- GALLERY ---------- */
+  .gallery { columns: 3; column-gap: 16px; }
+  .gallery figure {
+    break-inside: avoid; margin-bottom: 16px; border-radius: 14px; overflow: hidden;
+    position: relative; box-shadow: var(--shadow); cursor: pointer; background: var(--card);
+  }
+  .gallery img { width: 100%; display: block; transition: transform 0.5s, filter 0.4s; filter: saturate(0.9); }
+  .gallery figure:hover img { transform: scale(1.06); filter: saturate(1.1); }
+  .gallery figcaption {
+    position: absolute; inset: auto 0 0 0; padding: 30px 16px 14px;
+    background: linear-gradient(transparent, rgba(0,23,55,0.85));
+    color: #f4f1ea; font-family: 'Cormorant Garamond', serif; font-size: 1.2rem;
+    opacity: 0; transition: opacity 0.3s;
+  }
+  .gallery figure:hover figcaption { opacity: 1; }
+
+  /* ---------- CONTACT ---------- */
+  .contact-wrap { max-width: 640px; margin: 0 auto; background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 44px; box-shadow: var(--shadow); }
+  .field { margin-bottom: 20px; }
+  .field label { display: block; font-size: 0.82rem; letter-spacing: 0.05em; margin-bottom: 7px; color: var(--ink-soft); }
+  .field input, .field textarea, .field select {
+    width: 100%; padding: 13px 16px; background: var(--bg); border: 1px solid var(--border);
+    border-radius: 10px; color: var(--ink); font-family: 'Outfit', sans-serif; font-size: 0.95rem; transition: border 0.2s;
+  }
+  .field input:focus, .field textarea:focus, .field select:focus { outline: none; border-color: var(--accent); }
+  .field textarea { resize: vertical; min-height: 110px; }
+  .form-msg { text-align: center; padding: 12px; border-radius: 10px; margin-top: 14px; font-size: 0.9rem; display: none; }
+  .form-msg.show { display: block; background: var(--accent); color: var(--on-accent); }
+
+  /* ---------- FOOTER ---------- */
+  footer { padding: 50px 0; border-top: 1px solid var(--border); text-align: center; }
+  .footer-logo { height: 40px; color: var(--ink); margin-bottom: 16px; }
+  .footer-logo svg { height: 100%; fill: currentColor; }
+  footer p { color: var(--ink-soft); font-size: 0.85rem; }
+
+  /* ---------- MODAL ---------- */
+  .modal-bg { position: fixed; inset: 0; background: rgba(0,23,55,0.6); backdrop-filter: blur(6px); z-index: 200; display: none; place-items: center; padding: 24px; }
+  .modal-bg.open { display: grid; animation: rise 0.3s ease; }
+  .modal { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 38px; max-width: 380px; width: 100%; box-shadow: var(--shadow-lg); }
+  .modal h3 { font-size: 1.8rem; margin-bottom: 6px; }
+  .modal p { color: var(--ink-soft); font-size: 0.88rem; margin-bottom: 22px; }
+  .modal .close-x { float: right; cursor: pointer; color: var(--ink-soft); font-size: 1.3rem; border: none; background: none; }
+  .lightbox { position: fixed; inset: 0; background: rgba(0,5,15,0.92); z-index: 300; display: none; place-items: center; padding: 30px; cursor: zoom-out; }
+  .lightbox.open { display: grid; }
+  .lightbox img { max-width: 90vw; max-height: 88vh; border-radius: 10px; box-shadow: var(--shadow-lg); }
+
+  @media (max-width: 760px) {
+    .nav-links { position: fixed; inset: 60px 0 auto 0; flex-direction: column; background: var(--bg); padding: 24px; border-bottom: 1px solid var(--border); display: none; }
+    .nav-links.open { display: flex; }
+    .menu-toggle { display: block; }
+    .gallery { columns: 2; }
+    .admin-row { grid-template-columns: 1fr; }
+    .event-item { flex-wrap: wrap; }
+  }
+  @media (max-width: 480px) { .gallery { columns: 1; } }
+</style>
+
+<!-- reusable logo symbol (inherits currentColor) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="amlogo" viewBox="0 0 271.87 94.74">
+    <path d="M49.96,79.25c-1.75-.53-3.78-1.33-5.86-2.55-4.48-2.61-7.25-5.98-8.9-8.58-.62-.97-2.04-.97-2.66,0-1.64,2.59-4.42,5.97-8.9,8.58-2.08,1.22-4.11,2.01-5.86,2.55-.44.13-.73.5-.73.92v2.42c0,.54.48.97,1.06.97h31.51c.59,0,1.06-.43,1.06-.97v-2.42c0-.42-.3-.79-.73-.92Z"/>
+    <path d="M61.04,36.15c-1.56-1.33-3.09-2.7-4.51-4.18-3.26-3.4-6.2-7.08-8.79-11.02-3.5-5.32-6.34-11.09-8.44-17.13h0c-.91-2.54-3.16-3.82-5.42-3.82s-4.51,1.27-5.42,3.82h0c-2.1,6.04-4.94,11.81-8.44,17.13-2.59,3.94-5.53,7.63-8.79,11.02-1.42,1.48-2.95,2.85-4.51,4.18C2.47,39.74-.17,45.16,0,51.19c.3,10.04,8.52,18.19,18.57,18.4,1.62.09,5.88.09,10.12-2.62,1.26-.81,2.28-1.7,3.1-2.57,1.14-1.2,3.03-1.2,4.17,0,.82.86,1.84,1.76,3.1,2.57,4.24,2.72,8.5,2.71,10.12,2.62,10.04-.21,18.27-8.36,18.57-18.4.18-6.03-2.46-11.45-6.7-15.04ZM25.89,34.32c1.65-2.08,3.2-4.23,4.66-6.45.74-1.13,1.46-2.27,2.15-3.43.27-.45.72-.67,1.18-.67s.91.22,1.18.67c.69,1.16,1.4,2.31,2.15,3.43,1.46,2.22,3.02,4.37,4.66,6.45.27.34.03.84-.4.84h-7.59s-7.59,0-7.59,0c-.43,0-.67-.5-.4-.84ZM55.06,51.05c-.2,3.12-2.74,5.66-5.86,5.86-.72.07-1.48.11-2.25.12-3.93.05-7.43-.73-10.35-1.77-1.76-.63-3.7-.63-5.46,0-2.92,1.04-6.42,1.82-10.35,1.77-.78,0-1.53-.05-2.25-.12-3.12-.21-5.65-2.74-5.86-5.86-.01-.19-.02-.38-.01-.57.02-.94.28-1.85.71-2.67.53-.99,1.56-1.6,2.68-1.6h17.8s17.8,0,17.8,0c1.12,0,2.16.61,2.68,1.6.44.82.69,1.73.71,2.67,0,.19,0,.38-.01.57Z"/>
+    <path d="M188.08,47.09h0c.28-1.27,2.1-1.27,2.38,0h0c.35,1.58,1.58,2.81,3.15,3.15h0c1.27.28,1.27,2.1,0,2.38h0c-1.58.35-2.81,1.58-3.15,3.15h0c-.28,1.27-2.1,1.27-2.38,0h0c-.35-1.58-1.58-2.81-3.15-3.15h0c-1.27-.28-1.27-2.1,0-2.38h0c1.58-.35,2.81-1.58,3.15-3.15Z"/>
+    <path d="M87.45,40.37l2.15-5.86v.09h12.6v-.09l2.24,5.86c.03.09.11.14.21.14h6.95c.16,0,.26-.16.21-.3l-12.38-31.63c-.03-.08-.11-.14-.21-.14h-6.62c-.09,0-.17.06-.21.14l-12.2,31.63c-.06.14.05.3.21.3h6.86c.09,0,.17-.06.21-.14ZM91.62,28.49l4.09-11.92c.07-.2.35-.2.42,0l3.96,11.92c.05.14-.06.29-.21.29h-8.05c-.15,0-.26-.15-.21-.29Z"/>
+    <path d="M130.69,27.86v12.43c0,.12.1.22.22.22h6.39c.12,0,.22-.1.22-.22v-12.56c0-5.96-1.79-11.23-8.39-11.23-2.66,0-4.99.84-6.89,3.2-.13.16-.39.08-.39-.13v-2.34c0-.12-.1-.22-.22-.22h-6.39c-.12,0-.22.1-.22.22v23.07c0,.12.1.22.22.22h6.39c.12,0,.22-.1.22-.22v-12.38c0-3.25,1.33-5.77,4.49-5.77s4.35,2.47,4.35,5.73Z"/>
+    <path d="M160.43,34c0-.78-.12-1.81-.49-2.66-.04-.08-.12-.13-.21-.13h-4.17c-.54,0-.94.48-.85,1.01.05.34.09.7.09,1.01,0,1.1-.46,2.2-1.79,2.2s-1.74-1.05-1.74-2.06v-10.78c0-.12.1-.22.22-.22h6.07c.12,0,.22-.1.22-.22v-4.92c0-.12-.1-.22-.22-.22h-6.07c-.12,0-.22-.1-.22-.22v-5.33c0-.12-.1-.22-.22-.22h-4.87c-.11,0-.2.08-.22.18l-.99,5.41c-.02.1-.11.18-.22.18h-3.63c-.12,0-.22.1-.22.22v4.92c0,.12.1.22.22.22h3.09c.12,0,.22.1.22.22v10.14c0,6.83,4.03,8.29,8.16,8.29,5.54,0,7.84-3.53,7.84-7.01Z"/>
+    <path d="M164.08,40.51h6.39c.12,0,.22-.1.22-.22v-12.38c0-3.25,1.33-5.77,4.49-5.77s4.35,2.47,4.35,5.73v12.43c0,.12.1.22.22.22h6.39c.12,0,.22-.1.22-.22v-12.56c0-5.96-1.79-11.23-8.39-11.23-2.66,0-4.99.84-6.89,3.2-.13.16-.39.08-.39-.13V7.6c0-.12-.1-.22-.22-.22h-6.39c-.12,0-.22.1-.22.22v32.69c0,.12.1.22.22.22Z"/>
+    <path d="M203.4,41.01c6.87,0,12.92-4.95,12.92-12.28s-6.05-12.23-12.92-12.23-12.92,4.9-12.92,12.23,6.09,12.28,12.92,12.28ZM203.4,22.36c3.39,0,6.28,2.75,6.28,6.37s-2.89,6.42-6.28,6.42-6.28-2.7-6.28-6.42,2.93-6.37,6.28-6.37Z"/>
+    <path d="M234.83,16.5c-2.66,0-4.99.84-6.89,3.2-.13.16-.39.08-.39-.13v-2.34c0-.12-.1-.22-.22-.22h-6.39c-.12,0-.22.1-.22.22v23.07c0,.12.1.22.22.22h6.39c.12,0,.22-.1.22-.22v-12.38c0-3.25,1.33-5.77,4.49-5.77s4.35,2.47,4.35,5.73v12.43c0,.12.1.22.22.22h6.39c.12,0,.22-.1.22-.22v-12.56c0-5.96-1.79-11.23-8.39-11.23Z"/>
+    <path d="M271.65,17h-7.02c-.09,0-.17.06-.21.14l-5.33,14.03c-.07.19-.34.19-.41,0l-5.33-14.03c-.03-.09-.11-.14-.21-.14h-7.21c-.16,0-.27.16-.2.31l9.49,21.14c.03.06.03.12,0,.18l-5.19,12.3c-.06.15.05.31.2.31h6.4c.09,0,.17-.05.2-.13l15.02-33.79c.06-.15-.04-.31-.2-.31Z"/>
+    <path d="M117.21,51.43h-6.8c-.09,0-.17.05-.2.14l-8.72,20.96c-.08.18-.33.18-.41,0l-8.72-20.96c-.03-.08-.11-.14-.2-.14h-6.8c-.11,0-.21.09-.22.2l-2.94,31.63c-.01.13.09.24.22.24h6.66c.11,0,.21-.09.22-.2l1.6-18.43c.02-.23.33-.28.42-.07l7.62,18.19c.03.08.11.14.2.14h4.29c.09,0,.17-.05.2-.14l7.62-18.19c.09-.21.4-.16.42.07l1.6,18.43c0,.11.11.2.22.2h6.66c.13,0,.23-.11.22-.24l-2.94-31.63c-.01-.11-.11-.2-.22-.2Z"/>
+    <path d="M149.49,60h-6.39c-.12,0-.22.1-.22.22v2.36c0,.21-.25.29-.39.14-1.64-1.9-4.21-3.23-7.13-3.23-7.33,0-11.32,5.54-11.32,12.14s4.31,12.37,11.46,12.37c3.18,0,5.33-1.29,6.98-3.4.13-.17.4-.08.4.13v2.55c0,.12.1.22.22.22h6.39c.12,0,.22-.1.22-.22v-23.07c0-.12-.1-.22-.22-.22ZM138.99,78.17c-4.15,1.29-8.15-2.2-8.12-6.54.02-3.59,2.13-6.58,5.86-6.58s6.32,2.66,6.32,7.01c0,3.34-1.72,5.38-4.07,6.11Z"/>
+    <path d="M179.63,60h-6.39c-.12,0-.22.1-.22.22v2.36c0,.21-.25.29-.39.14-1.64-1.9-4.21-3.23-7.12-3.23-7.33,0-11.32,5.54-11.32,12.14s4.31,12.37,11.46,12.37c3.44,0,5.68-1.51,7.38-3.94v2.57c0,5.13-3.76,6.19-7.29,6.19-2.49,0-5.4-1.33-6.85-2.49-.11-.09-.26-.05-.33.07l-2.5,4.91c-.05.1-.02.21.06.28,2.38,1.86,5.87,3.14,10.99,3.14,6.69,0,12.74-3.62,12.74-12.88v-21.64c0-.12-.1-.22-.22-.22ZM169.14,78.17c-4.15,1.29-8.15-2.2-8.12-6.54.02-3.59,2.13-6.58,5.86-6.58s6.32,2.66,6.32,7.01c0,3.34-1.71,5.38-4.07,6.11Z"/>
+    <path d="M192.68,60.22c0-.12-.1-.22-.22-.22h-6.39c-.12,0-.22.1-.22.22v3.29h6.83v-3.29Z"/>
+    <path d="M185.85,83.29c0,.12.1.22.22.22h6.39c.12,0,.22-.1.22-.22v-2.94h-6.83v2.94Z"/>
+    <rect x="185.85" y="65.04" width="6.83" height="13.78"/>
+    <path d="M210.64,65.64c1.16,0,3.75.26,5.99,2.17.1.09.26.07.33-.05l2.87-4.6c.06-.1.03-.23-.06-.3-3.95-2.87-7.06-3.36-9.45-3.36-8.06,0-13.15,5.27-13.15,12.23s5.09,12.23,13.15,12.23c2.39,0,5.5-.49,9.45-3.36.09-.07.12-.2.06-.3l-2.87-4.6c-.07-.11-.22-.13-.33-.05-2.25,1.91-4.84,2.17-5.99,2.17-3.99,0-6.64-2.52-6.64-6.09s2.66-6.09,6.64-6.09Z"/>
+  </symbol>
+</svg>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="#top" class="nav-logo" aria-label="Anthony Magic home"><svg><use href="#amlogo"/></svg></a>
+    <div class="nav-links" id="navLinks">
+      <a href="#events">Events</a>
+      <a href="#tickets">Tickets</a>
+      <a href="#gallery">Gallery</a>
+      <a href="#contact">Contact</a>
+      <button class="theme-btn" id="themeBtn" aria-label="Toggle theme">☾</button>
+    </div>
+    <button class="menu-toggle" id="menuToggle" aria-label="Menu">☰</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero" id="top">
+  <div class="hero-logo"><svg><use href="#amlogo"/></svg></div>
+  <p class="hero-tag">Close-up wonder &amp; stage illusion</p>
+  <div class="hero-cta">
+    <a href="#tickets" class="btn btn-primary">Get Tickets</a>
+    <a href="#contact" class="btn btn-ghost">Book a Show</a>
+  </div>
+</header>
+
+<!-- EVENTS -->
+<section class="block" id="events" style="background:var(--bg-alt)">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">Where to find me</span>
+      <h2>Upcoming Events</h2>
+      <div class="divider"></div>
+    </div>
+    <div class="events-bar">
+      <a class="admin-link" id="adminLink">✦ Admin</a>
+    </div>
+
+    <div class="admin-panel" id="adminPanel">
+      <h4>Add an event <span class="logout-link" id="logoutLink">log out</span></h4>
+      <div class="admin-row">
+        <div class="field" style="margin:0"><label>Date</label><input type="date" id="evDate"></div>
+        <div class="field" style="margin:0"><label>Title</label><input type="text" id="evTitle" placeholder="The Vanishing Hour"></div>
+        <div class="field" style="margin:0"><label>Venue / details</label><input type="text" id="evVenue" placeholder="The Magic Castle, 8pm"></div>
+        <button class="btn btn-primary" id="evAdd" style="padding:13px 22px">Add</button>
+      </div>
+    </div>
+
+    <div class="event-list" id="eventList"></div>
+  </div>
+</section>
+
+<!-- TICKETS -->
+<section class="block" id="tickets">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">Reserve your seat</span>
+      <h2>Tickets</h2>
+      <div class="divider"></div>
+    </div>
+    <div class="ticket-grid">
+      <div class="ticket-card">
+        <div class="tier">The Curious</div>
+        <div class="price">$25 <span>/ seat</span></div>
+        <ul><li>General admission</li><li>Full 90-minute show</li><li>Open seating</li></ul>
+        <button class="btn btn-ghost buy-btn" data-tier="The Curious — $25">Select</button>
+      </div>
+      <div class="ticket-card featured">
+        <div class="badge">Best</div>
+        <div class="tier">The Believer</div>
+        <div class="price">$45 <span>/ seat</span></div>
+        <ul><li>Front-row reserved seat</li><li>Post-show meet &amp; greet</li><li>Signed playing card</li></ul>
+        <button class="btn btn-primary buy-btn" data-tier="The Believer — $45">Select</button>
+      </div>
+      <div class="ticket-card">
+        <div class="tier">The Inner Circle</div>
+        <div class="price">$80 <span>/ seat</span></div>
+        <ul><li>Private close-up session</li><li>VIP reserved seating</li><li>Souvenir &amp; drink included</li></ul>
+        <button class="btn btn-ghost buy-btn" data-tier="The Inner Circle — $80">Select</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GALLERY -->
+<section class="block" id="gallery" style="background:var(--bg-alt)">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">Moments of wonder</span>
+      <h2>Gallery</h2>
+      <div class="divider"></div>
+    </div>
+    <div class="gallery" id="gallery">
+      <figure><img src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=600&q=80" alt="Cards in mid-air"><figcaption>The Reveal</figcaption></figure>
+      <figure><img src="https://images.unsplash.com/photo-1606166187734-a4cb74079037?w=600&q=80" alt="Playing cards"><figcaption>Sleight of Hand</figcaption></figure>
+      <figure><img src="https://images.unsplash.com/photo-1635868521025-c3a40f53c660?w=600&q=80" alt="Stage lights"><figcaption>Center Stage</figcaption></figure>
+      <figure><img src="https://images.unsplash.com/photo-1542204165-65bf26472b9b?w=600&q=80" alt="Top hat"><figcaption>Classic Wonder</figcaption></figure>
+      <figure><img src="https://images.unsplash.com/photo-1601758174114-e711c0cbaa69?w=600&q=80" alt="Spotlight"><figcaption>The Spotlight</figcaption></figure>
+      <figure><img src="https://images.unsplash.com/photo-1572177812156-58036aae439c?w=600&q=80" alt="Crowd"><figcaption>A Captivated Crowd</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="block" id="contact">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">Let's talk</span>
+      <h2>Book a Show</h2>
+      <div class="divider"></div>
+    </div>
+    <div class="contact-wrap">
+      <div class="field"><label for="cName">Name</label><input type="text" id="cName" placeholder="Your name"></div>
+      <div class="field"><label for="cEmail">Email</label><input type="email" id="cEmail" placeholder="you@email.com"></div>
+      <div class="field"><label for="cType">Event type</label>
+        <select id="cType"><option>Private party</option><option>Corporate event</option><option>Wedding</option><option>Theater show</option><option>Other</option></select>
+      </div>
+      <div class="field"><label for="cMsg">Message</label><textarea id="cMsg" placeholder="Tell me about your event…"></textarea></div>
+      <button class="btn btn-primary" id="contactSend" style="width:100%">Send Inquiry</button>
+      <div class="form-msg" id="formMsg">✦ Thank you — Anthony will be in touch soon.</div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="footer-logo"><svg><use href="#amlogo"/></svg></div>
+    <p>&copy; <span id="yr"></span> Anthony Magic · Prepare to be amazed</p>
+  </div>
+</footer>
+
+<!-- TICKET MODAL -->
+<div class="modal-bg" id="ticketModal">
+  <div class="modal">
+    <button class="close-x" data-close>&times;</button>
+    <h3>Reserve Tickets</h3>
+    <p id="modalTier"></p>
+    <div class="field"><label>Name</label><input type="text" id="tName"></div>
+    <div class="field"><label>Email</label><input type="email" id="tEmail"></div>
+    <div class="field"><label>Quantity</label><input type="number" id="tQty" value="1" min="1" max="10"></div>
+    <button class="btn btn-primary" id="tConfirm" style="width:100%">Confirm &amp; Pay</button>
+    <div class="form-msg" id="tMsg">✦ Reserved! A confirmation is on its way.</div>
+  </div>
+</div>
+
+<!-- LOGIN MODAL -->
+<div class="modal-bg" id="loginModal">
+  <div class="modal">
+    <button class="close-x" data-close>&times;</button>
+    <h3>Admin Login</h3>
+    <p>Sign in to manage events.</p>
+    <div class="field"><label>Password</label><input type="password" id="adminPass" placeholder="••••••••"></div>
+    <button class="btn btn-primary" id="adminLogin" style="width:100%">Sign In</button>
+    <div class="form-msg" id="loginErr" style="background:#c0392b;color:#fff">Incorrect password.</div>
+  </div>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox"><img id="lightboxImg" alt="enlarged"></div>
+
+<script>
+(function () {
+  // ---------- THEME ----------
+  const themeBtn = document.getElementById('themeBtn');
+  let theme = 'light';
+  function applyTheme(t) {
+    theme = t;
+    document.documentElement.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light');
+    themeBtn.textContent = t === 'dark' ? '☀' : '☾';
+  }
+  // respect OS preference initially
+  applyTheme(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  themeBtn.addEventListener('click', () => applyTheme(theme === 'dark' ? 'light' : 'dark'));
+
+  // ---------- MOBILE MENU ----------
+  const navLinks = document.getElementById('navLinks');
+  document.getElementById('menuToggle').addEventListener('click', () => navLinks.classList.toggle('open'));
+  navLinks.querySelectorAll('a').forEach(a => a.addEventListener('click', () => navLinks.classList.remove('open')));
+
+  document.getElementById('yr').textContent = new Date().getFullYear();
+
+  // ---------- EVENTS (persistent) ----------
+  const ADMIN_PASSWORD = 'abracadabra'; // Anthony can change this
+  const eventList = document.getElementById('eventList');
+  const seedEvents = [
+    { id: 's1', date: '2026-06-14', title: 'The Vanishing Hour', venue: 'The Rivoli Theatre · 8:00 PM' },
+    { id: 's2', date: '2026-07-02', title: 'Close-Up Cabaret', venue: 'Smoke & Mirrors Lounge · 7:30 PM' },
+    { id: 's3', date: '2026-08-19', title: 'Summer Illusions Gala', venue: 'Grand Hall · 6:00 PM' }
+  ];
+  let events = [];
+  let isAdmin = false;
+  const MONTHS = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+
+  async function loadEvents() {
+    try {
+      const res = await window.storage.get('events');
+      events = res ? JSON.parse(res.value) : seedEvents.slice();
+    } catch (e) {
+      events = seedEvents.slice();
+    }
+    renderEvents();
+  }
+  async function saveEvents() {
+    try { await window.storage.set('events', JSON.stringify(events)); }
+    catch (e) { console.error('save failed', e); }
+  }
+  function renderEvents() {
+    const sorted = events.slice().sort((a, b) => a.date.localeCompare(b.date));
+    if (!sorted.length) { eventList.innerHTML = '<div class="empty-note">No shows on the calendar just yet — check back soon.</div>'; return; }
+    eventList.innerHTML = sorted.map(ev => {
+      const d = ev.date ? new Date(ev.date + 'T00:00:00') : null;
+      const day = d ? d.getDate() : '?';
+      const mon = d ? MONTHS[d.getMonth()] : '';
+      const del = isAdmin ? `<button class="event-del" data-id="${ev.id}" title="Delete">&times;</button>` : '';
+      return `<div class="event-item">
+        <div class="event-date"><div class="day">${day}</div><div class="mon">${mon}</div></div>
+        <div class="event-body"><h3>${escapeHtml(ev.title)}</h3><p>${escapeHtml(ev.venue || '')}</p></div>
+        ${del}</div>`;
+    }).join('');
+    eventList.querySelectorAll('.event-del').forEach(b => b.addEventListener('click', async () => {
+      events = events.filter(e => e.id !== b.dataset.id);
+      await saveEvents(); renderEvents();
+    }));
+  }
+  function escapeHtml(s) { return (s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+  // ---------- ADMIN ----------
+  const loginModal = document.getElementById('loginModal');
+  const adminPanel = document.getElementById('adminPanel');
+  document.getElementById('adminLink').addEventListener('click', () => {
+    if (isAdmin) { adminPanel.classList.toggle('open'); }
+    else { openModal(loginModal); }
+  });
+  document.getElementById('adminLogin').addEventListener('click', () => {
+    if (document.getElementById('adminPass').value === ADMIN_PASSWORD) {
+      isAdmin = true; closeModal(loginModal); adminPanel.classList.add('open'); renderEvents();
+      document.getElementById('loginErr').classList.remove('show');
+    } else { document.getElementById('loginErr').classList.add('show'); }
+  });
+  document.getElementById('logoutLink').addEventListener('click', () => {
+    isAdmin = false; adminPanel.classList.remove('open'); renderEvents();
+  });
+  document.getElementById('evAdd').addEventListener('click', async () => {
+    const date = document.getElementById('evDate').value;
+    const title = document.getElementById('evTitle').value.trim();
+    const venue = document.getElementById('evVenue').value.trim();
+    if (!title || !date) { alert('Please add at least a date and a title.'); return; }
+    events.push({ id: 'e' + Date.now(), date, title, venue });
+    await saveEvents(); renderEvents();
+    document.getElementById('evTitle').value = '';
+    document.getElementById('evVenue').value = '';
+    document.getElementById('evDate').value = '';
+  });
+
+  // ---------- MODALS ----------
+  function openModal(m) { m.classList.add('open'); }
+  function closeModal(m) { m.classList.remove('open'); }
+  document.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', e => closeModal(e.target.closest('.modal-bg'))));
+  document.querySelectorAll('.modal-bg').forEach(m => m.addEventListener('click', e => { if (e.target === m) closeModal(m); }));
+
+  // ---------- TICKETS ----------
+  const ticketModal = document.getElementById('ticketModal');
+  document.querySelectorAll('.buy-btn').forEach(b => b.addEventListener('click', () => {
+    document.getElementById('modalTier').textContent = b.dataset.tier;
+    document.getElementById('tMsg').classList.remove('show');
+    openModal(ticketModal);
+  }));
+  document.getElementById('tConfirm').addEventListener('click', () => {
+    const n = document.getElementById('tName').value.trim();
+    const em = document.getElementById('tEmail').value.trim();
+    if (!n || !em) { alert('Please enter your name and email.'); return; }
+    document.getElementById('tMsg').classList.add('show');
+    setTimeout(() => closeModal(ticketModal), 1800);
+  });
+
+  // ---------- CONTACT ----------
+  document.getElementById('contactSend').addEventListener('click', () => {
+    const n = document.getElementById('cName').value.trim();
+    const em = document.getElementById('cEmail').value.trim();
+    const msg = document.getElementById('cMsg').value.trim();
+    if (!n || !em || !msg) { alert('Please fill in your name, email, and message.'); return; }
+    document.getElementById('formMsg').classList.add('show');
+    document.getElementById('cName').value = '';
+    document.getElementById('cEmail').value = '';
+    document.getElementById('cMsg').value = '';
+  });
+
+  // ---------- LIGHTBOX ----------
+  const lightbox = document.getElementById('lightbox');
+  const lightboxImg = document.getElementById('lightboxImg');
+  document.querySelectorAll('.gallery img').forEach(img => img.addEventListener('click', () => {
+    lightboxImg.src = img.src.replace('w=600', 'w=1400');
+    lightbox.classList.add('open');
+  }));
+  lightbox.addEventListener('click', () => lightbox.classList.remove('open'));
+
+  loadEvents();
+})();
+</script>
