@@ -1,4 +1,39 @@
-<!-- Anthony Magic — single-file site -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Anthony Magic — Close-Up Wonder &amp; Stage Illusion</title>
+  <meta
+    name="description"
+    content="Anthony Magic — close-up wonder and stage illusion for private parties, corporate events, weddings, and theater shows. Book a performance."
+  />
+
+  <!-- Open Graph / Twitter -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Anthony Magic — Close-Up Wonder & Stage Illusion" />
+  <meta
+    property="og:description"
+    content="Close-up wonder and stage illusion for parties, corporate events, weddings, and theaters. Book a show."
+  />
+  <meta property="og:image" content="imgs/Anthony_Stage.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <link rel="icon" type="image/svg+xml" href="imgs/favicon.svg" />
+  <meta name="theme-color" content="#001737" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Outfit:wght@300;400;500;600&display=swap"
+  />
+
+  <!-- Supabase client (no build step needed) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
   :root {
     --navy: #001737;
@@ -28,8 +63,6 @@
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Outfit:wght@300;400;500;600&display=swap');
 
   html { scroll-behavior: smooth; }
 
@@ -249,6 +282,8 @@
   }
   @media (max-width: 480px) { .gallery { columns: 1; } }
 </style>
+</head>
+<body>
 
 <!-- reusable logo symbol (inherits currentColor) -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -304,7 +339,8 @@
   <figure class="hero-image">
     <img src="imgs/Anthony_Stage.png" alt="Anthony performing on stage">
   </figure>
-  <p class="hero-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+  <!-- EDIT: replace with Anthony's own bio -->
+  <p class="hero-text">For over a decade, Anthony has turned ordinary rooms into spaces of pure astonishment — blending sleight of hand, mind-bending illusion, and genuine warmth. From intimate close-up sets to full stage productions, every performance is crafted to leave audiences gasping, laughing, and wondering how on earth he did it.</p>
   <div class="hero-cta">
     <a href="#contact" class="btn btn-primary">Book a Show</a>
     <a href="#gallery" class="btn btn-ghost">View Gallery</a>
@@ -345,6 +381,7 @@
       <h2>Gallery</h2>
       <div class="divider"></div>
     </div>
+    <!-- EDIT: replace these placeholder images with real performance photos (only Anthony_Stage.png exists today) -->
     <div class="gallery" id="gallery">
       <figure><img src="imgs/Anthony_Stage.png" alt="Cards in mid-air"></figure>
       <figure><img src="imgs/Anthony_Stage.png" alt="Playing cards"></figure>
@@ -395,16 +432,19 @@
       <h2>Book a Show</h2>
       <div class="divider"></div>
     </div>
-    <div class="contact-wrap">
-      <div class="field"><label for="cName">Name</label><input type="text" id="cName" placeholder="Your name"></div>
-      <div class="field"><label for="cEmail">Email</label><input type="email" id="cEmail" placeholder="you@email.com"></div>
+    <form class="contact-wrap" id="contactForm" method="POST">
+      <!-- Honeypot: hidden from humans; bots that fill it are dropped by Formspree. -->
+      <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true" style="display:none">
+      <input type="hidden" name="_subject" value="New booking inquiry — Anthony Magic">
+      <div class="field"><label for="cName">Name</label><input type="text" id="cName" name="name" placeholder="Your name" required></div>
+      <div class="field"><label for="cEmail">Email</label><input type="email" id="cEmail" name="email" placeholder="you@email.com" required></div>
       <div class="field"><label for="cType">Event type</label>
-        <select id="cType"><option>Private party</option><option>Corporate event</option><option>Wedding</option><option>Theater show</option><option>Other</option></select>
+        <select id="cType" name="event-type"><option>Private party</option><option>Corporate event</option><option>Wedding</option><option>Theater show</option><option>Other</option></select>
       </div>
-      <div class="field"><label for="cMsg">Message</label><textarea id="cMsg" placeholder="Tell me about your event…"></textarea></div>
-      <button class="btn btn-primary" id="contactSend" style="width:100%">Send Inquiry</button>
-      <div class="form-msg" id="formMsg">✦ Thank you — Anthony will be in touch soon.</div>
-    </div>
+      <div class="field"><label for="cMsg">Message</label><textarea id="cMsg" name="message" placeholder="Tell me about your event…" required></textarea></div>
+      <button type="submit" class="btn btn-primary" id="contactSend" style="width:100%">Send Inquiry</button>
+      <div class="form-msg" id="formMsg"></div>
+    </form>
   </div>
 </section>
 
@@ -422,9 +462,10 @@
     <button class="close-x" data-close>&times;</button>
     <h3>Admin Login</h3>
     <p>Sign in to manage events.</p>
-    <div class="field"><label>Password</label><input type="password" id="adminPass" placeholder="••••••••"></div>
+    <div class="field"><label>Email</label><input type="email" id="adminEmail" placeholder="you@email.com" autocomplete="username"></div>
+    <div class="field"><label>Password</label><input type="password" id="adminPass" placeholder="••••••••" autocomplete="current-password"></div>
     <button class="btn btn-primary" id="adminLogin" style="width:100%">Sign In</button>
-    <div class="form-msg" id="loginErr" style="background:#c0392b;color:#fff">Incorrect password.</div>
+    <div class="form-msg" id="loginErr" style="background:#c0392b;color:#fff">Incorrect email or password.</div>
   </div>
 </div>
 
@@ -433,7 +474,22 @@
 
 <script>
 (function () {
-  // ---------- THEME ----------
+  // ── CONFIG ──────────────────────────────────────────────────────────────────
+  // Formspree form ID — create a form at https://formspree.io pointed at Anthony's
+  // inbox, then paste the part after /f/ here. See SETUP.md.
+  const FORMSPREE_ID = 'mbdewpno';
+
+  // Supabase — these two values are PUBLIC BY DESIGN and safe to ship ONLY because
+  // Row-Level Security is enabled AND public sign-ups are disabled (see SETUP.md).
+  // NEVER paste the service_role key here — it would grant anyone full DB access.
+  const SUPABASE_URL = 'https://jmeqeitykffbgmppzepq.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_sNOeE05JXxiJaE0pLBKpSQ_s7-ea-EK';
+
+  const sb = /^https:\/\//.test(SUPABASE_URL) && window.supabase
+    ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+    : null;
+
+  // ── THEME ─────────────────────────────────────────────────────────────────
   const themeBtn = document.getElementById('themeBtn');
   let theme = 'light';
   function applyTheme(t) {
@@ -445,45 +501,26 @@
   applyTheme(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
   themeBtn.addEventListener('click', () => applyTheme(theme === 'dark' ? 'light' : 'dark'));
 
-  // ---------- MOBILE MENU ----------
+  // ── MOBILE MENU ─────────────────────────────────────────────────────────────
   const navLinks = document.getElementById('navLinks');
   document.getElementById('menuToggle').addEventListener('click', () => navLinks.classList.toggle('open'));
   navLinks.querySelectorAll('a').forEach(a => a.addEventListener('click', () => navLinks.classList.remove('open')));
 
   document.getElementById('yr').textContent = new Date().getFullYear();
 
-  // ---------- EVENTS (persistent) ----------
-  const ADMIN_PASSWORD = 'abracadabra'; // Anthony can change this
+  // ── EVENTS (Supabase-backed) ────────────────────────────────────────────────
   const eventList = document.getElementById('eventList');
-  const seedEvents = [
-    { id: 's1', date: '2026-06-14', title: 'The Vanishing Hour', venue: 'The Rivoli Theatre · 8:00 PM' },
-    { id: 's2', date: '2026-07-02', title: 'Close-Up Cabaret', venue: 'Smoke & Mirrors Lounge · 7:30 PM' },
-    { id: 's3', date: '2026-08-19', title: 'Summer Illusions Gala', venue: 'Grand Hall · 6:00 PM' }
-  ];
+  const MONTHS = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
   let events = [];
   let isAdmin = false;
-  const MONTHS = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
 
-  const STORAGE_KEY = 'anthonyMagicEvents';
+  function escapeHtml(s) { return (s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
-  function loadEvents() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      events = raw ? JSON.parse(raw) : seedEvents.slice();
-    } catch (e) {
-      events = seedEvents.slice();
-    }
-    renderEvents();
-  }
-  function saveEvents() {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(events)); }
-    catch (e) { console.error('save failed', e); }
-  }
   function renderEvents() {
-    const sorted = events.slice().sort((a, b) => a.date.localeCompare(b.date));
+    const sorted = events.slice().sort((a, b) => (a.event_date || '').localeCompare(b.event_date || ''));
     if (!sorted.length) { eventList.innerHTML = '<div class="empty-note">No shows on the calendar just yet — check back soon.</div>'; return; }
     eventList.innerHTML = sorted.map(ev => {
-      const d = ev.date ? new Date(ev.date + 'T00:00:00') : null;
+      const d = ev.event_date ? new Date(ev.event_date + 'T00:00:00') : null;
       const day = d ? d.getDate() : '?';
       const mon = d ? MONTHS[d.getMonth()] : '';
       const del = isAdmin ? `<button class="event-del" data-id="${ev.id}" title="Delete">&times;</button>` : '';
@@ -492,68 +529,124 @@
         <div class="event-body"><h3>${escapeHtml(ev.title)}</h3><p>${escapeHtml(ev.venue || '')}</p></div>
         ${del}</div>`;
     }).join('');
-    eventList.querySelectorAll('.event-del').forEach(b => b.addEventListener('click', () => {
-      events = events.filter(e => e.id !== b.dataset.id);
-      saveEvents(); renderEvents();
-    }));
+    eventList.querySelectorAll('.event-del').forEach(b => b.addEventListener('click', () => deleteEvent(b.dataset.id)));
   }
-  function escapeHtml(s) { return (s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
-  // ---------- ADMIN ----------
+  async function loadEvents() {
+    if (!sb) { eventList.innerHTML = '<div class="empty-note">Events appear here once the booking backend is connected.</div>'; return; }
+    const { data, error } = await sb.from('events').select('*').order('event_date', { ascending: true });
+    if (error) { console.error('load events failed', error); eventList.innerHTML = '<div class="empty-note">Could not load events right now.</div>'; return; }
+    events = data || [];
+    renderEvents();
+  }
+
+  async function deleteEvent(id) {
+    if (!sb) return;
+    const { error } = await sb.from('events').delete().eq('id', id);
+    if (error) { console.error('delete failed', error); alert('Could not delete that event.'); return; }
+    await loadEvents();
+  }
+
+  // ── ADMIN AUTH (Supabase) ───────────────────────────────────────────────────
   const loginModal = document.getElementById('loginModal');
   const adminPanel = document.getElementById('adminPanel');
+  const loginErr = document.getElementById('loginErr');
+
   document.getElementById('adminLink').addEventListener('click', () => {
     if (isAdmin) { adminPanel.classList.toggle('open'); }
-    else { openModal(loginModal); }
+    else { loginErr.classList.remove('show'); openModal(loginModal); }
   });
-  document.getElementById('adminLogin').addEventListener('click', () => {
-    if (document.getElementById('adminPass').value === ADMIN_PASSWORD) {
-      isAdmin = true; closeModal(loginModal); adminPanel.classList.add('open'); renderEvents();
-      document.getElementById('loginErr').classList.remove('show');
-    } else { document.getElementById('loginErr').classList.add('show'); }
+
+  document.getElementById('adminLogin').addEventListener('click', async () => {
+    if (!sb) { loginErr.textContent = 'Backend not connected yet.'; loginErr.classList.add('show'); return; }
+    const email = document.getElementById('adminEmail').value.trim();
+    const password = document.getElementById('adminPass').value;
+    const { error } = await sb.auth.signInWithPassword({ email, password });
+    if (error) { loginErr.textContent = 'Incorrect email or password.'; loginErr.classList.add('show'); return; }
+    isAdmin = true;
+    loginErr.classList.remove('show');
+    closeModal(loginModal);
+    adminPanel.classList.add('open');
+    document.getElementById('adminPass').value = '';
+    renderEvents();
   });
-  document.getElementById('logoutLink').addEventListener('click', () => {
-    isAdmin = false; adminPanel.classList.remove('open'); renderEvents();
+
+  document.getElementById('logoutLink').addEventListener('click', async () => {
+    if (sb) await sb.auth.signOut();
+    isAdmin = false;
+    adminPanel.classList.remove('open');
+    renderEvents();
   });
-  document.getElementById('evAdd').addEventListener('click', () => {
-    const date = document.getElementById('evDate').value;
+
+  document.getElementById('evAdd').addEventListener('click', async () => {
+    if (!sb) return;
+    const event_date = document.getElementById('evDate').value;
     const title = document.getElementById('evTitle').value.trim();
     const venue = document.getElementById('evVenue').value.trim();
-    if (!title || !date) { alert('Please add at least a date and a title.'); return; }
-    events.push({ id: 'e' + Date.now(), date, title, venue });
-    saveEvents(); renderEvents();
+    if (!title || !event_date) { alert('Please add at least a date and a title.'); return; }
+    const { error } = await sb.from('events').insert({ event_date, title, venue });
+    if (error) { console.error('insert failed', error); alert('Could not add that event.'); return; }
     document.getElementById('evTitle').value = '';
     document.getElementById('evVenue').value = '';
     document.getElementById('evDate').value = '';
+    await loadEvents();
   });
 
-  // ---------- MODALS ----------
+  // ── MODALS ──────────────────────────────────────────────────────────────────
   function openModal(m) { m.classList.add('open'); }
   function closeModal(m) { m.classList.remove('open'); }
   document.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', e => closeModal(e.target.closest('.modal-bg'))));
   document.querySelectorAll('.modal-bg').forEach(m => m.addEventListener('click', e => { if (e.target === m) closeModal(m); }));
 
-  // ---------- CONTACT ----------
-  document.getElementById('contactSend').addEventListener('click', () => {
+  // ── CONTACT (Formspree) ───────────────────────────────────────────────────
+  const contactForm = document.getElementById('contactForm');
+  const formMsg = document.getElementById('formMsg');
+  contactForm.action = 'https://formspree.io/f/' + FORMSPREE_ID;
+
+  function showFormMsg(text, isErr) {
+    formMsg.textContent = text;
+    formMsg.style.background = isErr ? '#c0392b' : '';
+    formMsg.style.color = isErr ? '#fff' : '';
+    formMsg.classList.add('show');
+  }
+
+  contactForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
     const n = document.getElementById('cName').value.trim();
     const em = document.getElementById('cEmail').value.trim();
     const msg = document.getElementById('cMsg').value.trim();
-    if (!n || !em || !msg) { alert('Please fill in your name, email, and message.'); return; }
-    document.getElementById('formMsg').classList.add('show');
-    document.getElementById('cName').value = '';
-    document.getElementById('cEmail').value = '';
-    document.getElementById('cMsg').value = '';
+    if (!n || !em || !msg) { showFormMsg('Please fill in your name, email, and message.', true); return; }
+    try {
+      const res = await fetch(contactForm.action, {
+        method: 'POST',
+        body: new FormData(contactForm),
+        headers: { Accept: 'application/json' }
+      });
+      if (res.ok) { showFormMsg('✦ Thank you — Anthony will be in touch soon.', false); contactForm.reset(); }
+      else { showFormMsg('Something went wrong — please email Anthony directly.', true); }
+    } catch (err) {
+      showFormMsg('Network error — please try again.', true);
+    }
   });
 
-  // ---------- LIGHTBOX ----------
+  // ── LIGHTBOX ────────────────────────────────────────────────────────────────
   const lightbox = document.getElementById('lightbox');
   const lightboxImg = document.getElementById('lightboxImg');
   document.querySelectorAll('.gallery img').forEach(img => img.addEventListener('click', () => {
-    lightboxImg.src = img.src.replace('w=600', 'w=1400');
+    lightboxImg.src = img.src;
     lightbox.classList.add('open');
   }));
   lightbox.addEventListener('click', () => lightbox.classList.remove('open'));
 
-  loadEvents();
+  // ── INIT ────────────────────────────────────────────────────────────────────
+  (async () => {
+    if (sb) {
+      const { data } = await sb.auth.getSession();
+      isAdmin = !!(data && data.session);
+    }
+    await loadEvents();
+  })();
 })();
 </script>
+</body>
+</html>
