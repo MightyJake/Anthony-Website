@@ -278,6 +278,31 @@
   .review-card .reviewer { font-size: 0.9rem; font-weight: 500; color: var(--ink); }
   .review-card .reviewer span { display: block; font-weight: 400; font-size: 0.8rem; color: var(--ink-soft); letter-spacing: 0.02em; margin-top: 2px; }
 
+  /* review admin */
+  .rev-actions { position: absolute; top: 12px; right: 12px; display: flex; gap: 6px; opacity: 0; transition: opacity 0.2s; }
+  .review-card:hover .rev-actions { opacity: 1; }
+  .rev-edit, .rev-del { width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--border); background: var(--bg); color: var(--ink-soft); cursor: pointer; font-size: 0.85rem; display: grid; place-items: center; transition: all 0.2s; }
+  .rev-edit:hover { color: var(--ink); }
+  .rev-del:hover { color: #c0392b; border-color: #c0392b; }
+  .review-edit:hover { transform: none; box-shadow: var(--shadow); }
+  .rev-f { display: block; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-soft); text-align: left; margin-bottom: 12px; }
+  .review-edit textarea, .review-edit input, .review-edit select {
+    width: 100%; margin-top: 5px; padding: 9px 12px; background: var(--bg); border: 1px solid var(--border);
+    border-radius: 8px; color: var(--ink); font-family: 'Outfit', sans-serif; font-size: 0.9rem;
+  }
+  .review-edit textarea { resize: vertical; }
+  .review-edit textarea:focus, .review-edit input:focus, .review-edit select:focus { outline: none; border-color: var(--accent); }
+  .rev-form-actions { display: flex; gap: 10px; }
+  .rev-form-actions .btn { padding: 9px 18px; font-size: 0.82rem; }
+  .review-add {
+    border: 2px dashed var(--accent); border-radius: 18px; background: transparent; color: var(--accent);
+    cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+    min-height: 200px; font-family: 'Outfit', sans-serif; transition: background 0.2s, transform 0.2s;
+  }
+  .review-add:hover { background: var(--card); transform: translateY(-4px); }
+  .review-add .plus { font-size: 2.2rem; line-height: 1; }
+  .review-add .lbl { font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase; }
+
   /* ---------- CONTACT ---------- */
   .contact-wrap { max-width: 640px; margin: 0 auto; background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 44px; box-shadow: var(--shadow); }
   .field { margin-bottom: 20px; }
@@ -434,26 +459,7 @@
       <h2>Reviews</h2>
       <div class="divider"></div>
     </div>
-    <div class="review-grid">
-      <div class="review-card">
-        <div class="quote-mark">&ldquo;</div>
-        <div class="stars">★★★★★</div>
-        <blockquote>Anthony had our entire dinner party speechless. The card work inches from our faces was simply impossible — we're still arguing about how he did it.</blockquote>
-        <div class="reviewer">Marisa Holloway<span>Private party · Portland, OR</span></div>
-      </div>
-      <div class="review-card">
-        <div class="quote-mark">&ldquo;</div>
-        <div class="stars">★★★★★</div>
-        <blockquote>We booked Anthony for our company gala and he completely stole the night. Polished, funny, and genuinely jaw-dropping. Worth every penny.</blockquote>
-        <div class="reviewer">Devon Park<span>Corporate event · Seattle, WA</span></div>
-      </div>
-      <div class="review-card">
-        <div class="quote-mark">&ldquo;</div>
-        <div class="stars">★★★★★</div>
-        <blockquote>The stage show was pure wonder from start to finish. My kids were mesmerized and so were the adults. A magician who actually makes you believe again.</blockquote>
-        <div class="reviewer">Elena Vásquez<span>Theater show · Vancouver, WA</span></div>
-      </div>
-    </div>
+    <div class="review-grid" id="reviewGrid"></div>
   </div>
 </section>
 
@@ -623,6 +629,7 @@
     adminStatus.style.display = isAdmin ? 'flex' : 'none';
     renderEvents();
     renderGallery();
+    renderReviews();
   }
 
   adminLoginForm.addEventListener('submit', async (e) => {
@@ -782,6 +789,95 @@
 
   galleryUpload.addEventListener('change', () => uploadFiles([...galleryUpload.files]));
 
+  // ── REVIEWS / TESTIMONIALS (Supabase, admin add/edit/delete) ───────────────
+  const reviewGrid = document.getElementById('reviewGrid');
+  let reviews = [];
+  let editingReviewId = null;
+  let addingReview = false;
+
+  function reviewCardHTML(r) {
+    const stars = '★'.repeat(Math.max(1, Math.min(5, r.rating || 5)));
+    const actions = isAdmin ? `<div class="rev-actions">
+        <button class="rev-edit" data-id="${r.id}" title="Edit" aria-label="Edit testimonial">✎</button>
+        <button class="rev-del" data-id="${r.id}" title="Delete" aria-label="Delete testimonial">&times;</button>
+      </div>` : '';
+    return `<div class="review-card">${actions}
+      <div class="quote-mark">&ldquo;</div>
+      <div class="stars">${stars}</div>
+      <blockquote>${escapeHtml(r.quote)}</blockquote>
+      <div class="reviewer">${escapeHtml(r.reviewer)}<span>${escapeHtml(r.detail || '')}</span></div>
+    </div>`;
+  }
+
+  function reviewFormHTML(r) {
+    const isNew = !r.id;
+    const opts = [5, 4, 3, 2, 1].map(n => `<option value="${n}" ${(r.rating || 5) === n ? 'selected' : ''}>${'★'.repeat(n)}</option>`).join('');
+    return `<div class="review-card review-edit" data-id="${r.id || ''}">
+      <label class="rev-f">Quote<textarea class="re-quote" rows="4">${escapeHtml(r.quote || '')}</textarea></label>
+      <label class="rev-f">Name<input class="re-name" type="text" value="${escapeHtml(r.reviewer || '')}"></label>
+      <label class="rev-f">Detail (event · place)<input class="re-detail" type="text" value="${escapeHtml(r.detail || '')}"></label>
+      <label class="rev-f">Stars<select class="re-rating">${opts}</select></label>
+      <div class="rev-form-actions">
+        <button type="button" class="btn btn-primary re-save">${isNew ? 'Add' : 'Save'}</button>
+        <button type="button" class="btn btn-ghost re-cancel">Cancel</button>
+      </div>
+    </div>`;
+  }
+
+  function renderReviews() {
+    let html = reviews.map(r => (editingReviewId === r.id ? reviewFormHTML(r) : reviewCardHTML(r))).join('');
+    if (isAdmin && addingReview) html += reviewFormHTML({});
+    else if (isAdmin) html += `<button type="button" class="review-add" id="reviewAddBtn"><span class="plus">+</span><span class="lbl">Add testimonial</span></button>`;
+    reviewGrid.innerHTML = html;
+
+    reviewGrid.querySelectorAll('.rev-edit').forEach(b => b.addEventListener('click', () => { editingReviewId = b.dataset.id; addingReview = false; renderReviews(); }));
+    reviewGrid.querySelectorAll('.rev-del').forEach(b => b.addEventListener('click', () => deleteReview(b.dataset.id)));
+    const addBtn = document.getElementById('reviewAddBtn');
+    if (addBtn) addBtn.addEventListener('click', () => { addingReview = true; editingReviewId = null; renderReviews(); });
+    reviewGrid.querySelectorAll('.review-edit').forEach(card => {
+      card.querySelector('.re-save').addEventListener('click', () => saveReviewFromCard(card));
+      card.querySelector('.re-cancel').addEventListener('click', () => { editingReviewId = null; addingReview = false; renderReviews(); });
+    });
+  }
+
+  async function loadReviews() {
+    if (!sb) { reviewGrid.innerHTML = ''; return; }
+    const { data, error } = await sb.from('reviews').select('*').order('sort_order', { ascending: true });
+    if (error) { console.error('load reviews failed', error); return; }
+    reviews = data || [];
+    renderReviews();
+  }
+
+  async function saveReviewFromCard(card) {
+    if (!sb) return;
+    const id = card.dataset.id;
+    const payload = {
+      quote: card.querySelector('.re-quote').value.trim(),
+      reviewer: card.querySelector('.re-name').value.trim(),
+      detail: card.querySelector('.re-detail').value.trim(),
+      rating: parseInt(card.querySelector('.re-rating').value, 10) || 5
+    };
+    if (!payload.quote || !payload.reviewer) { alert('Please add at least a quote and a name.'); return; }
+    if (id) {
+      const { error } = await sb.from('reviews').update(payload).eq('id', id);
+      if (error) { console.error('update review failed', error); alert('Could not save changes.'); return; }
+      editingReviewId = null;
+    } else {
+      payload.sort_order = reviews.reduce((m, r) => Math.max(m, r.sort_order || 0), -1) + 1;
+      const { error } = await sb.from('reviews').insert(payload);
+      if (error) { console.error('insert review failed', error); alert('Could not add testimonial.'); return; }
+      addingReview = false;
+    }
+    await loadReviews();
+  }
+
+  async function deleteReview(id) {
+    if (!sb || !confirm('Delete this testimonial?')) return;
+    const { error } = await sb.from('reviews').delete().eq('id', id);
+    if (error) { console.error('delete review failed', error); alert('Could not delete.'); return; }
+    await loadReviews();
+  }
+
   // ── LIGHTBOX ────────────────────────────────────────────────────────────────
   const lightbox = document.getElementById('lightbox');
   const lightboxImg = document.getElementById('lightboxImg');
@@ -802,6 +898,7 @@
     }
     await loadEvents();
     await loadGallery();
+    await loadReviews();
     applyAuthUI();
   })();
 })();

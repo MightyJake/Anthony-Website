@@ -101,6 +101,35 @@ The gallery is also admin-managed (upload / drag-to-reorder / delete), reusing t
 Once logged in, scroll to **Gallery** → **✦ Upload images** (auto-resized in the browser),
 drag tiles to reorder, hover an image and click **×** to delete. All changes are live for visitors.
 
+### e. Testimonials (table)
+The Reviews section is also admin-managed (add / edit / delete), reusing the same login.
+
+1. **SQL Editor**, run:
+   ```sql
+   create table public.reviews (
+     id uuid primary key default gen_random_uuid(),
+     quote text not null,
+     reviewer text not null,
+     detail text default '',
+     rating int not null default 5,
+     sort_order int not null default 0,
+     created_at timestamptz default now()
+   );
+   alter table public.reviews enable row level security;
+   create policy "public read reviews" on public.reviews for select using (true);
+   create policy "auth insert reviews" on public.reviews for insert to authenticated with check (true);
+   create policy "auth update reviews" on public.reviews for update to authenticated using (true) with check (true);
+   create policy "auth delete reviews" on public.reviews for delete to authenticated using (true);
+
+   -- seed the three starter testimonials
+   insert into public.reviews (quote, reviewer, detail, rating, sort_order) values
+     ('Anthony had our entire dinner party speechless. The card work inches from our faces was simply impossible — we''re still arguing about how he did it.', 'Marisa Holloway', 'Private party · Portland, OR', 5, 0),
+     ('We booked Anthony for our company gala and he completely stole the night. Polished, funny, and genuinely jaw-dropping. Worth every penny.', 'Devon Park', 'Corporate event · Seattle, WA', 5, 1),
+     ('The stage show was pure wonder from start to finish. My kids were mesmerized and so were the adults. A magician who actually makes you believe again.', 'Elena Vásquez', 'Theater show · Vancouver, WA', 5, 2);
+   ```
+
+Logged in, scroll to **Reviews** → **+ Add testimonial**, or hover a card and click **✎** to edit or **×** to delete.
+
 ---
 
 ## 3. Deploy — Vercel
