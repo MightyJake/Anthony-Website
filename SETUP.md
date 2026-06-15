@@ -1,4 +1,4 @@
-# Anthony Magic — go-live setup
+# Anthony Orciuoli — go-live setup
 
 The site is a single static file (`index.html`). Before it's fully live you need to
 fill in three public config values and deploy. None of these are secrets that grant

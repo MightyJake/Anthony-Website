@@ -4,15 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <title>Anthony Magic — Close-Up Wonder &amp; Stage Illusion</title>
+  <title>Anthony Orciuoli — Close-Up Wonder &amp; Stage Illusion</title>
   <meta
     name="description"
-    content="Anthony Magic — close-up wonder and stage illusion for private parties, corporate events, weddings, and theater shows. Book a performance."
+    content="Anthony Orciuoli — close-up wonder and stage illusion for private parties, corporate events, weddings, and theater shows. Book a performance."
   />
 
   <!-- Open Graph / Twitter -->
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="Anthony Magic — Close-Up Wonder & Stage Illusion" />
+  <meta property="og:title" content="Anthony Orciuoli — Close-Up Wonder & Stage Illusion" />
   <meta
     property="og:description"
     content="Close-up wonder and stage illusion for parties, corporate events, weddings, and theaters. Book a show."
@@ -373,7 +373,7 @@
 <!-- NAV -->
 <nav>
   <div class="nav-inner">
-    <a href="#top" class="nav-logo" aria-label="Anthony Magic home"><svg><use href="#amlogo"/></svg></a>
+    <a href="#top" class="nav-logo" aria-label="Anthony Orciuoli home"><svg><use href="#amlogo"/></svg></a>
     <div class="nav-links" id="navLinks">
       <a href="#events">Events</a>
       <a href="#gallery">Gallery</a>
@@ -468,7 +468,7 @@
     <form class="contact-wrap" id="contactForm" method="POST">
       <!-- Honeypot: hidden from humans; bots that fill it are dropped by Formspree. -->
       <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true" style="display:none">
-      <input type="hidden" name="_subject" value="New booking inquiry — Anthony Magic">
+      <input type="hidden" name="_subject" value="New booking inquiry — Anthony Orciuoli">
       <div class="field"><label for="cName">Name</label><input type="text" id="cName" name="name" placeholder="Your name" required></div>
       <div class="field"><label for="cEmail">Email</label><input type="email" id="cEmail" name="email" placeholder="you@email.com" required></div>
       <div class="field"><label for="cType">Event type</label>
@@ -485,7 +485,7 @@
 <footer>
   <div class="container">
     <div class="footer-logo"><svg><use href="#amlogo"/></svg></div>
-    <p>&copy; <span id="yr"></span> Anthony Magic · Prepare to be amazed</p>
+    <p>&copy; <span id="yr"></span> Anthony Orciuoli · Prepare to be amazed</p>
   </div>
 
   <!-- Full-width admin strip (discreet, at the very bottom) -->
@@ -714,7 +714,7 @@
       const del = isAdmin
         ? `<button class="img-del" data-id="${g.id}" data-path="${escapeHtml(g.path)}" title="Delete" aria-label="Delete image">&times;</button>`
         : '';
-      return `<figure data-id="${g.id}"><img src="${publicUrl(g.path)}" alt="${escapeHtml(g.alt || 'Anthony Magic gallery image')}" loading="lazy">${del}</figure>`;
+      return `<figure data-id="${g.id}"><img src="${publicUrl(g.path)}" alt="${escapeHtml(g.alt || 'Anthony Orciuoli gallery image')}" loading="lazy">${del}</figure>`;
     }).join('') + addTile;
     galleryGrid.querySelectorAll('.img-del').forEach(b => b.addEventListener('click', (e) => {
       e.stopPropagation(); deleteImage(b.dataset.id, b.dataset.path);
