@@ -33,6 +33,8 @@
 
   <!-- Supabase client (no build step needed) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- SortableJS for admin gallery drag-to-reorder -->
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
 
 <style>
   :root {
@@ -188,9 +190,6 @@
   }
 
   /* ---------- EVENTS ---------- */
-  .events-bar { display: flex; justify-content: flex-end; margin-bottom: 20px; }
-  .admin-link { font-size: 0.82rem; color: var(--ink-soft); cursor: pointer; text-decoration: none; border: 1px solid var(--border); padding: 7px 16px; border-radius: 100px; transition: all 0.2s; }
-  .admin-link:hover { color: var(--ink); background: var(--card); }
   .event-list { display: flex; flex-direction: column; gap: 14px; max-width: 800px; margin: 0 auto; }
   .event-item {
     background: var(--card); border: 1px solid var(--border); border-radius: 14px;
@@ -212,21 +211,58 @@
   .event-del:hover { color: #c0392b; }
   .empty-note { text-align: center; color: var(--ink-soft); font-style: italic; padding: 30px; font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; }
 
-  /* admin add row */
-  .admin-panel { max-width: 800px; margin: 0 auto 22px; background: var(--card); border: 1px dashed var(--accent); border-radius: 14px; padding: 22px; display: none; }
-  .admin-panel.open { display: block; animation: rise 0.4s ease; }
-  .admin-panel h4 { font-family: 'Outfit'; font-weight: 600; font-size: 0.82rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 14px; }
-  .admin-row { display: grid; grid-template-columns: 130px 1fr 1fr auto; gap: 10px; align-items: end; }
-  .logout-link { font-size: 0.78rem; color: var(--ink-soft); cursor: pointer; margin-left: 12px; text-decoration: underline; }
+  /* inline "+ Add show" card (admin only) */
+  .event-add {
+    background: var(--card); border: 1px dashed var(--accent); border-radius: 14px;
+    padding: 16px 20px; display: grid; grid-template-columns: 150px 1fr 1fr auto; gap: 10px; align-items: center;
+    animation: rise 0.3s ease;
+  }
+  .event-add input {
+    width: 100%; padding: 11px 14px; background: var(--bg); border: 1px solid var(--border);
+    border-radius: 10px; color: var(--ink); font-family: 'Outfit', sans-serif; font-size: 0.92rem;
+  }
+  .event-add input:focus { outline: none; border-color: var(--accent); }
+  .add-btn {
+    flex-shrink: 0; width: 44px; height: 44px; border-radius: 50%; border: none; cursor: pointer;
+    background: var(--accent); color: var(--on-accent); font-size: 1.6rem; line-height: 1;
+    display: grid; place-items: center; transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .add-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
 
   /* ---------- GALLERY ---------- */
-  .gallery { columns: 3; column-gap: 16px; }
+  .gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
   .gallery figure {
-    break-inside: avoid; margin-bottom: 16px; border-radius: 14px; overflow: hidden;
+    border-radius: 14px; overflow: hidden; margin: 0;
     position: relative; box-shadow: var(--shadow); cursor: pointer; background: var(--card);
   }
-  .gallery img { width: 100%; display: block; transition: transform 0.5s, filter 0.4s; filter: saturate(0.9); }
+  .gallery img {
+    width: 100%; height: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block;
+    transition: transform 0.5s, filter 0.4s; filter: saturate(0.9);
+  }
   .gallery figure:hover img { transform: scale(1.06); filter: saturate(1.1); }
+  .gallery-empty { grid-column: 1 / -1; text-align: center; color: var(--ink-soft); font-style: italic; padding: 30px; font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; }
+
+  /* gallery admin */
+  .gallery-add {
+    border: 2px dashed var(--accent); border-radius: 14px; background: transparent;
+    display: grid; place-items: center; text-align: center; cursor: pointer; aspect-ratio: 4 / 3;
+    color: var(--accent); transition: background 0.2s, transform 0.2s;
+  }
+  .gallery-add:hover { background: var(--card); transform: translateY(-2px); }
+  .gallery-add .plus { font-size: 2.6rem; line-height: 1; }
+  .gallery-add .lbl { font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; margin-top: 4px; }
+  .gallery.is-admin figure { cursor: grab; }
+  .gallery.is-admin figure:active { cursor: grabbing; }
+  .img-del {
+    position: absolute; top: 8px; right: 8px; z-index: 2;
+    width: 30px; height: 30px; border-radius: 50%; border: none; cursor: pointer;
+    background: rgba(0,5,15,0.6); color: #fff; font-size: 1.1rem; line-height: 1;
+    display: grid; place-items: center; opacity: 0; transition: opacity 0.2s, background 0.2s;
+  }
+  .gallery figure:hover .img-del { opacity: 1; }
+  .img-del:hover { background: #c0392b; }
+  .sortable-ghost { opacity: 0.35; }
+  .sortable-chosen { box-shadow: var(--shadow-lg); }
 
   /* ---------- REVIEWS ---------- */
   .review-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; }
@@ -256,18 +292,30 @@
   .form-msg.show { display: block; background: var(--accent); color: var(--on-accent); }
 
   /* ---------- FOOTER ---------- */
-  footer { padding: 50px 0; border-top: 1px solid var(--border); text-align: center; }
+  footer { padding: 50px 0 0; border-top: 1px solid var(--border); text-align: center; }
   .footer-logo { height: 40px; color: var(--ink); margin-bottom: 16px; }
   .footer-logo svg { height: 100%; fill: currentColor; }
   footer p { color: var(--ink-soft); font-size: 0.85rem; }
 
-  /* ---------- MODAL ---------- */
-  .modal-bg { position: fixed; inset: 0; background: rgba(0,23,55,0.6); backdrop-filter: blur(6px); z-index: 200; display: none; place-items: center; padding: 24px; }
-  .modal-bg.open { display: grid; animation: rise 0.3s ease; }
-  .modal { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 38px; max-width: 380px; width: 100%; box-shadow: var(--shadow-lg); }
-  .modal h3 { font-size: 1.8rem; margin-bottom: 6px; }
-  .modal p { color: var(--ink-soft); font-size: 0.88rem; margin-bottom: 22px; }
-  .modal .close-x { float: right; cursor: pointer; color: var(--ink-soft); font-size: 1.3rem; border: none; background: none; }
+  /* full-width admin strip at the very bottom */
+  .footer-admin { border-top: 1px solid var(--border); background: var(--bg-alt); margin-top: 44px; }
+  .footer-admin .container { padding-top: 24px; padding-bottom: 24px; }
+  .admin-login {
+    display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap;
+  }
+  .admin-login .al-label { font-size: 0.72rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-soft); margin-right: 6px; }
+  .admin-login input {
+    padding: 10px 14px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+    color: var(--ink); font-family: 'Outfit', sans-serif; font-size: 0.88rem; min-width: 200px;
+  }
+  .admin-login input:focus { outline: none; border-color: var(--accent); }
+  .admin-login .btn { padding: 10px 22px; font-size: 0.85rem; }
+  .admin-login .al-err { color: #c0392b; font-size: 0.82rem; width: 100%; text-align: center; display: none; }
+  .admin-login .al-err.show { display: block; }
+  .admin-status { display: none; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap; }
+  .admin-status .dot { color: #2e9e5b; font-size: 0.85rem; }
+
+  /* ---------- LIGHTBOX ---------- */
   .lightbox { position: fixed; inset: 0; background: rgba(0,5,15,0.92); z-index: 300; display: none; place-items: center; padding: 30px; cursor: zoom-out; }
   .lightbox.open { display: grid; }
   .lightbox img { max-width: 90vw; max-height: 88vh; border-radius: 10px; box-shadow: var(--shadow-lg); }
@@ -276,11 +324,11 @@
     .nav-links { position: fixed; inset: 60px 0 auto 0; flex-direction: column; background: var(--bg); padding: 24px; border-bottom: 1px solid var(--border); display: none; }
     .nav-links.open { display: flex; }
     .menu-toggle { display: block; }
-    .gallery { columns: 2; }
+    .gallery { grid-template-columns: repeat(2, 1fr); }
     .admin-row { grid-template-columns: 1fr; }
     .event-item { flex-wrap: wrap; }
   }
-  @media (max-width: 480px) { .gallery { columns: 1; } }
+  @media (max-width: 480px) { .gallery { grid-template-columns: repeat(2, 1fr); } }
 </style>
 </head>
 <body>
@@ -355,20 +403,6 @@
       <h2>Upcoming Events</h2>
       <div class="divider"></div>
     </div>
-    <div class="events-bar">
-      <a class="admin-link" id="adminLink">✦ Admin</a>
-    </div>
-
-    <div class="admin-panel" id="adminPanel">
-      <h4>Add an event <span class="logout-link" id="logoutLink">log out</span></h4>
-      <div class="admin-row">
-        <div class="field" style="margin:0"><label>Date</label><input type="date" id="evDate"></div>
-        <div class="field" style="margin:0"><label>Title</label><input type="text" id="evTitle" placeholder="The Vanishing Hour"></div>
-        <div class="field" style="margin:0"><label>Venue / details</label><input type="text" id="evVenue" placeholder="The Magic Castle, 8pm"></div>
-        <button class="btn btn-primary" id="evAdd" style="padding:13px 22px">Add</button>
-      </div>
-    </div>
-
     <div class="event-list" id="eventList"></div>
   </div>
 </section>
@@ -381,15 +415,9 @@
       <h2>Gallery</h2>
       <div class="divider"></div>
     </div>
-    <!-- EDIT: replace these placeholder images with real performance photos (only Anthony_Stage.png exists today) -->
-    <div class="gallery" id="gallery">
-      <figure><img src="imgs/Anthony_Stage.png" alt="Cards in mid-air"></figure>
-      <figure><img src="imgs/Anthony_Stage.png" alt="Playing cards"></figure>
-      <figure><img src="imgs/Anthony_Stage.png" alt="Stage lights"></figure>
-      <figure><img src="imgs/Anthony_Stage.png" alt="Top hat"></figure>
-      <figure><img src="imgs/Anthony_Stage.png" alt="Spotlight"></figure>
-      <figure><img src="imgs/Anthony_Stage.png" alt="Crowd"></figure>
-    </div>
+    <!-- Upload input is triggered by the in-grid "+" tile (admin only) -->
+    <input type="file" id="galleryUpload" accept="image/*" multiple hidden>
+    <div class="gallery" id="galleryGrid"></div>
   </div>
 </section>
 
@@ -454,20 +482,27 @@
     <div class="footer-logo"><svg><use href="#amlogo"/></svg></div>
     <p>&copy; <span id="yr"></span> Anthony Magic · Prepare to be amazed</p>
   </div>
-</footer>
 
-<!-- LOGIN MODAL -->
-<div class="modal-bg" id="loginModal">
-  <div class="modal">
-    <button class="close-x" data-close>&times;</button>
-    <h3>Admin Login</h3>
-    <p>Sign in to manage events.</p>
-    <div class="field"><label>Email</label><input type="email" id="adminEmail" placeholder="you@email.com" autocomplete="username"></div>
-    <div class="field"><label>Password</label><input type="password" id="adminPass" placeholder="••••••••" autocomplete="current-password"></div>
-    <button class="btn btn-primary" id="adminLogin" style="width:100%">Sign In</button>
-    <div class="form-msg" id="loginErr" style="background:#c0392b;color:#fff">Incorrect email or password.</div>
+  <!-- Full-width admin strip (discreet, at the very bottom) -->
+  <div class="footer-admin">
+    <div class="container">
+      <!-- Logged out: admin login -->
+      <form class="admin-login" id="adminLoginForm">
+        <span class="al-label">Site admin</span>
+        <input type="email" id="adminEmail" placeholder="Email" autocomplete="username" aria-label="Admin email">
+        <input type="password" id="adminPass" placeholder="Password" autocomplete="current-password" aria-label="Admin password">
+        <button type="submit" class="btn btn-primary" id="adminLogin">Sign in</button>
+        <div class="al-err" id="loginErr">Incorrect email or password.</div>
+      </form>
+      <!-- Logged in: status + log out -->
+      <div class="admin-status" id="adminStatus">
+        <span class="dot">●</span>
+        <span>Admin mode — manage events &amp; gallery above.</span>
+        <button type="button" class="btn btn-ghost" id="logoutBtn">Log out</button>
+      </div>
+    </div>
   </div>
-</div>
+</footer>
 
 <!-- LIGHTBOX -->
 <div class="lightbox" id="lightbox"><img id="lightboxImg" alt="enlarged"></div>
@@ -518,8 +553,7 @@
 
   function renderEvents() {
     const sorted = events.slice().sort((a, b) => (a.event_date || '').localeCompare(b.event_date || ''));
-    if (!sorted.length) { eventList.innerHTML = '<div class="empty-note">No shows on the calendar just yet — check back soon.</div>'; return; }
-    eventList.innerHTML = sorted.map(ev => {
+    let html = sorted.map(ev => {
       const d = ev.event_date ? new Date(ev.event_date + 'T00:00:00') : null;
       const day = d ? d.getDate() : '?';
       const mon = d ? MONTHS[d.getMonth()] : '';
@@ -529,7 +563,33 @@
         <div class="event-body"><h3>${escapeHtml(ev.title)}</h3><p>${escapeHtml(ev.venue || '')}</p></div>
         ${del}</div>`;
     }).join('');
+    if (!sorted.length && !isAdmin) {
+      html = '<div class="empty-note">No shows on the calendar just yet — check back soon.</div>';
+    }
+    if (isAdmin) {
+      // Inline "+ Add show" card merged into the list
+      html += `<div class="event-add">
+        <input type="date" id="evDate" aria-label="Date">
+        <input type="text" id="evTitle" placeholder="Show title" aria-label="Title">
+        <input type="text" id="evVenue" placeholder="Venue / time" aria-label="Venue / time">
+        <button class="add-btn" id="evAdd" title="Add show" aria-label="Add show">+</button>
+      </div>`;
+    }
+    eventList.innerHTML = html;
     eventList.querySelectorAll('.event-del').forEach(b => b.addEventListener('click', () => deleteEvent(b.dataset.id)));
+    const addBtn = document.getElementById('evAdd');
+    if (addBtn) addBtn.addEventListener('click', addEvent);
+  }
+
+  async function addEvent() {
+    if (!sb) return;
+    const event_date = document.getElementById('evDate').value;
+    const title = document.getElementById('evTitle').value.trim();
+    const venue = document.getElementById('evVenue').value.trim();
+    if (!title || !event_date) { alert('Please add at least a date and a title.'); return; }
+    const { error } = await sb.from('events').insert({ event_date, title, venue });
+    if (error) { console.error('insert failed', error); alert('Could not add that event.'); return; }
+    await loadEvents();
   }
 
   async function loadEvents() {
@@ -547,17 +607,21 @@
     await loadEvents();
   }
 
-  // ── ADMIN AUTH (Supabase) ───────────────────────────────────────────────────
-  const loginModal = document.getElementById('loginModal');
-  const adminPanel = document.getElementById('adminPanel');
+  // ── ADMIN AUTH (Supabase, footer login) ────────────────────────────────────
   const loginErr = document.getElementById('loginErr');
+  const adminLoginForm = document.getElementById('adminLoginForm');
+  const adminStatus = document.getElementById('adminStatus');
 
-  document.getElementById('adminLink').addEventListener('click', () => {
-    if (isAdmin) { adminPanel.classList.toggle('open'); }
-    else { loginErr.classList.remove('show'); openModal(loginModal); }
-  });
+  // Single source of truth for showing/hiding ALL admin UI based on the session.
+  function applyAuthUI() {
+    adminLoginForm.style.display = isAdmin ? 'none' : 'flex';
+    adminStatus.style.display = isAdmin ? 'flex' : 'none';
+    renderEvents();
+    renderGallery();
+  }
 
-  document.getElementById('adminLogin').addEventListener('click', async () => {
+  adminLoginForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
     if (!sb) { loginErr.textContent = 'Backend not connected yet.'; loginErr.classList.add('show'); return; }
     const email = document.getElementById('adminEmail').value.trim();
     const password = document.getElementById('adminPass').value;
@@ -565,38 +629,15 @@
     if (error) { loginErr.textContent = 'Incorrect email or password.'; loginErr.classList.add('show'); return; }
     isAdmin = true;
     loginErr.classList.remove('show');
-    closeModal(loginModal);
-    adminPanel.classList.add('open');
     document.getElementById('adminPass').value = '';
-    renderEvents();
+    applyAuthUI();
   });
 
-  document.getElementById('logoutLink').addEventListener('click', async () => {
+  document.getElementById('logoutBtn').addEventListener('click', async () => {
     if (sb) await sb.auth.signOut();
     isAdmin = false;
-    adminPanel.classList.remove('open');
-    renderEvents();
+    applyAuthUI();
   });
-
-  document.getElementById('evAdd').addEventListener('click', async () => {
-    if (!sb) return;
-    const event_date = document.getElementById('evDate').value;
-    const title = document.getElementById('evTitle').value.trim();
-    const venue = document.getElementById('evVenue').value.trim();
-    if (!title || !event_date) { alert('Please add at least a date and a title.'); return; }
-    const { error } = await sb.from('events').insert({ event_date, title, venue });
-    if (error) { console.error('insert failed', error); alert('Could not add that event.'); return; }
-    document.getElementById('evTitle').value = '';
-    document.getElementById('evVenue').value = '';
-    document.getElementById('evDate').value = '';
-    await loadEvents();
-  });
-
-  // ── MODALS ──────────────────────────────────────────────────────────────────
-  function openModal(m) { m.classList.add('open'); }
-  function closeModal(m) { m.classList.remove('open'); }
-  document.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', e => closeModal(e.target.closest('.modal-bg'))));
-  document.querySelectorAll('.modal-bg').forEach(m => m.addEventListener('click', e => { if (e.target === m) closeModal(m); }));
 
   // ── CONTACT (Formspree) ───────────────────────────────────────────────────
   const contactForm = document.getElementById('contactForm');
@@ -629,13 +670,123 @@
     }
   });
 
+  // ── GALLERY (Supabase Storage + DB, admin-managed) ──────────────────────────
+  const galleryGrid = document.getElementById('galleryGrid');
+  const galleryUpload = document.getElementById('galleryUpload');
+  let galleryImages = [];
+  let sortable = null;
+
+  function publicUrl(path) { return sb.storage.from('gallery').getPublicUrl(path).data.publicUrl; }
+
+  function destroySortable() { if (sortable) { sortable.destroy(); sortable = null; } }
+  function initSortable() {
+    if (sortable || !window.Sortable) return;
+    sortable = window.Sortable.create(galleryGrid, {
+      animation: 150, draggable: 'figure', ghostClass: 'sortable-ghost', chosenClass: 'sortable-chosen',
+      filter: '.img-del', onEnd: persistOrder
+    });
+  }
+
+  function wireAddTile() {
+    const t = document.getElementById('galleryAddTile');
+    if (!t) return;
+    t.addEventListener('click', () => galleryUpload.click());
+    t.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); galleryUpload.click(); } });
+  }
+
+  function renderGallery() {
+    galleryGrid.classList.toggle('is-admin', isAdmin);
+    const addTile = isAdmin
+      ? `<div class="gallery-add" id="galleryAddTile" role="button" tabindex="0" title="Upload images" aria-label="Upload images"><div><div class="plus">+</div><div class="lbl">Upload</div></div></div>`
+      : '';
+    if (!galleryImages.length) {
+      destroySortable();
+      galleryGrid.innerHTML = isAdmin ? addTile : '<div class="gallery-empty">Photos coming soon.</div>';
+      wireAddTile();
+      return;
+    }
+    galleryGrid.innerHTML = galleryImages.map(g => {
+      const del = isAdmin
+        ? `<button class="img-del" data-id="${g.id}" data-path="${escapeHtml(g.path)}" title="Delete" aria-label="Delete image">&times;</button>`
+        : '';
+      return `<figure data-id="${g.id}"><img src="${publicUrl(g.path)}" alt="${escapeHtml(g.alt || 'Anthony Magic gallery image')}" loading="lazy">${del}</figure>`;
+    }).join('') + addTile;
+    galleryGrid.querySelectorAll('.img-del').forEach(b => b.addEventListener('click', (e) => {
+      e.stopPropagation(); deleteImage(b.dataset.id, b.dataset.path);
+    }));
+    wireAddTile();
+    if (isAdmin) initSortable(); else destroySortable();
+  }
+
+  async function loadGallery() {
+    if (!sb) { galleryGrid.innerHTML = '<div class="gallery-empty">Photos coming soon.</div>'; return; }
+    const { data, error } = await sb.from('gallery_images').select('*').order('sort_order', { ascending: true });
+    if (error) { console.error('load gallery failed', error); galleryGrid.innerHTML = '<div class="gallery-empty">Could not load images.</div>'; return; }
+    galleryImages = data || [];
+    renderGallery();
+  }
+
+  async function persistOrder() {
+    const ids = [...galleryGrid.querySelectorAll('figure')].map(f => f.dataset.id);
+    galleryImages.sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id));
+    for (let i = 0; i < ids.length; i++) {
+      const { error } = await sb.from('gallery_images').update({ sort_order: i }).eq('id', ids[i]);
+      if (error) console.error('reorder failed', error);
+    }
+  }
+
+  // Downscale + compress in the browser so phone/camera photos don't bloat the page.
+  async function resizeImage(file, max = 1600, quality = 0.85) {
+    try {
+      const bmp = await createImageBitmap(file);
+      const scale = Math.min(1, max / Math.max(bmp.width, bmp.height));
+      const w = Math.round(bmp.width * scale), h = Math.round(bmp.height * scale);
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(bmp, 0, 0, w, h);
+      const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', quality));
+      return blob || file;
+    } catch (e) { console.warn('resize failed, using original', e); return file; }
+  }
+
+  async function uploadFiles(files) {
+    if (!sb || !files.length) return;
+    let maxOrder = galleryImages.reduce((m, g) => Math.max(m, g.sort_order || 0), -1);
+    for (const file of files) {
+      if (!file.type.startsWith('image/')) continue;
+      const blob = await resizeImage(file);
+      const path = `${crypto.randomUUID()}.jpg`;
+      const up = await sb.storage.from('gallery').upload(path, blob, { contentType: 'image/jpeg' });
+      if (up.error) { console.error('upload failed', up.error); alert('Upload failed: ' + up.error.message); continue; }
+      maxOrder += 1;
+      const ins = await sb.from('gallery_images').insert({ path, alt: file.name.replace(/\.[^.]+$/, ''), sort_order: maxOrder });
+      if (ins.error) { console.error('insert failed', ins.error); alert('Saving image failed: ' + ins.error.message); }
+    }
+    galleryUpload.value = '';
+    await loadGallery();
+  }
+
+  async function deleteImage(id, path) {
+    if (!sb || !confirm('Delete this image?')) return;
+    const rm = await sb.storage.from('gallery').remove([path]);
+    if (rm.error) console.error('storage remove failed', rm.error);
+    const { error } = await sb.from('gallery_images').delete().eq('id', id);
+    if (error) { console.error('delete failed', error); alert('Could not delete image.'); return; }
+    await loadGallery();
+  }
+
+  galleryUpload.addEventListener('change', () => uploadFiles([...galleryUpload.files]));
+
   // ── LIGHTBOX ────────────────────────────────────────────────────────────────
   const lightbox = document.getElementById('lightbox');
   const lightboxImg = document.getElementById('lightboxImg');
-  document.querySelectorAll('.gallery img').forEach(img => img.addEventListener('click', () => {
+  galleryGrid.addEventListener('click', (e) => {
+    if (e.target.closest('.img-del')) return;
+    const img = e.target.closest('img');
+    if (!img) return;
     lightboxImg.src = img.src;
     lightbox.classList.add('open');
-  }));
+  });
   lightbox.addEventListener('click', () => lightbox.classList.remove('open'));
 
   // ── INIT ────────────────────────────────────────────────────────────────────
@@ -645,6 +796,8 @@
       isAdmin = !!(data && data.session);
     }
     await loadEvents();
+    await loadGallery();
+    applyAuthUI();
   })();
 })();
 </script>

@@ -73,6 +73,34 @@ A hidden honeypot field (`_gotcha`) is already wired for spam protection.
 Anthony logs in via the **✦ Admin** link in the Events section, then adds/deletes shows.
 Changes persist in the database and are visible to every visitor.
 
+### d. Gallery image manager (Storage + table)
+The gallery is also admin-managed (upload / drag-to-reorder / delete), reusing the same login.
+
+1. **Storage → New bucket**: name it **`gallery`** and mark it **Public**.
+2. **SQL Editor**, run:
+   ```sql
+   create table public.gallery_images (
+     id uuid primary key default gen_random_uuid(),
+     path text not null,
+     alt text default '',
+     sort_order int not null default 0,
+     created_at timestamptz default now()
+   );
+   alter table public.gallery_images enable row level security;
+   create policy "public read images" on public.gallery_images for select using (true);
+   create policy "auth insert images" on public.gallery_images for insert to authenticated with check (true);
+   create policy "auth update images" on public.gallery_images for update to authenticated using (true) with check (true);
+   create policy "auth delete images" on public.gallery_images for delete to authenticated using (true);
+
+   -- Storage object policies for the 'gallery' bucket
+   create policy "public read gallery" on storage.objects for select using (bucket_id = 'gallery');
+   create policy "auth upload gallery" on storage.objects for insert to authenticated with check (bucket_id = 'gallery');
+   create policy "auth delete gallery" on storage.objects for delete to authenticated using (bucket_id = 'gallery');
+   ```
+
+Once logged in, scroll to **Gallery** → **✦ Upload images** (auto-resized in the browser),
+drag tiles to reorder, hover an image and click **×** to delete. All changes are live for visitors.
+
 ---
 
 ## 3. Deploy — Vercel
@@ -87,5 +115,4 @@ Pushing to the repo's default branch will auto-redeploy.
 
 ## Still to do (content)
 - Replace the placeholder hero bio (marked `EDIT: Anthony's bio` in `index.html`).
-- Replace the 6 repeated gallery images with real performance photos
-  (only `imgs/Anthony_Stage.png` exists today).
+- Upload real performance photos via the in-site **Gallery** admin (once section 2d is done).
