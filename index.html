@@ -531,8 +531,8 @@
     <p>&copy; <span id="yr"></span> Anthony Orciuoli · Will Wonders Never Cease</p>
   </div>
 
-  <!-- Full-width admin strip (discreet, at the very bottom) -->
-  <div class="footer-admin">
+  <!-- Full-width admin strip — hidden by default; revealed via the #admin hash -->
+  <div class="footer-admin" id="footerAdmin" hidden>
     <div class="container">
       <!-- Logged out: admin login -->
       <form class="admin-login" id="adminLoginForm">
@@ -596,6 +596,31 @@
   const MONTHS = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
   let events = [];
   let isAdmin = false;
+
+  // ── ADMIN UI VISIBILITY ────────────────────────────────────────────────────
+  // The footer admin strip is hidden for everyone by default. It reveals when the
+  // URL carries #admin (bookmark yoursite.com/#admin), and that choice is
+  // remembered on this browser via localStorage so the hash isn't needed on
+  // later visits. Logging out forgets it again. This is cosmetic only — real
+  // access still requires a valid Supabase login.
+  const footerAdmin = document.getElementById('footerAdmin');
+  function adminUiUnlocked() {
+    try {
+      if (location.hash.toLowerCase() === '#admin') {
+        localStorage.setItem('amAdminUI', '1');
+        return true;
+      }
+      return localStorage.getItem('amAdminUI') === '1';
+    } catch (e) {
+      return location.hash.toLowerCase() === '#admin';
+    }
+  }
+  window.addEventListener('hashchange', () => {
+    if (location.hash.toLowerCase() === '#admin') {
+      applyAuthUI();
+      footerAdmin.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  });
 
   function escapeHtml(s) { return (s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
@@ -662,6 +687,7 @@
 
   // Single source of truth for showing/hiding ALL admin UI based on the session.
   function applyAuthUI() {
+    footerAdmin.hidden = !(isAdmin || adminUiUnlocked());
     adminLoginForm.style.display = isAdmin ? 'none' : 'flex';
     adminStatus.style.display = isAdmin ? 'flex' : 'none';
     renderEvents();
@@ -685,6 +711,7 @@
   document.getElementById('logoutBtn').addEventListener('click', async () => {
     if (sb) await sb.auth.signOut();
     isAdmin = false;
+    try { localStorage.removeItem('amAdminUI'); } catch (e) {}
     applyAuthUI();
   });
 
