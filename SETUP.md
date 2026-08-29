@@ -70,8 +70,9 @@ A hidden honeypot field (`_gotcha`) is already wired for spam protection.
    const SUPABASE_ANON_KEY = 'eyJhbGci...';   // anon/public key only
    ```
 
-Anthony logs in via the **✦ Admin** link in the Events section, then adds/deletes shows.
-Changes persist in the database and are visible to every visitor.
+Anthony logs in via the site-admin strip in the footer (reveal it by visiting
+`yoursite.com/#admin`), then adds/deletes shows. Changes persist in the database
+and are visible to every visitor.
 
 ### d. Gallery image manager (Storage + table)
 The gallery is also admin-managed (upload / drag-to-reorder / delete), reusing the same login.
