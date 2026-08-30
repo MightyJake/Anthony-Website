@@ -242,6 +242,32 @@
   .gallery figure:hover img { transform: scale(1.06); filter: saturate(1.1); }
   .gallery-empty { grid-column: 1 / -1; text-align: center; color: var(--ink-soft); font-style: italic; padding: 30px; font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; }
 
+  /* gallery carousel — shown to visitors; admins get the grid above for editing */
+  .gallery.is-carousel {
+    display: block; overflow: hidden;
+    width: 100vw; margin-left: calc(50% - 50vw);
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent);
+            mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent);
+  }
+  .gallery-track {
+    display: flex; align-items: flex-start; width: max-content;
+    animation: gallery-scroll 60s linear infinite;
+  }
+  .gallery.is-carousel:hover .gallery-track,
+  .gallery.is-carousel:focus-within .gallery-track { animation-play-state: paused; }
+  .gallery.is-carousel figure {
+    flex: 0 0 auto; width: clamp(230px, 30vw, 360px); margin-right: 18px;
+  }
+  .gallery.is-carousel figure img { height: auto; }
+  @keyframes gallery-scroll {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .gallery.is-carousel { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .gallery-track { animation: none; }
+  }
+
   /* gallery admin */
   .gallery-add {
     border: 2px dashed var(--accent); border-radius: 14px; background: transparent;
@@ -787,6 +813,13 @@
     t.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); galleryUpload.click(); } });
   }
 
+  const figureHTML = (g, lazy) => {
+    const del = isAdmin
+      ? `<button class="img-del" data-id="${g.id}" data-path="${escapeHtml(g.path)}" title="Delete" aria-label="Delete image">&times;</button>`
+      : '';
+    return `<figure data-id="${g.id}"><img src="${publicUrl(g.path)}" alt="${escapeHtml(g.alt || 'Anthony Orciuoli gallery image')}"${lazy ? ' loading="lazy"' : ''}>${del}</figure>`;
+  };
+
   function renderGallery() {
     galleryGrid.classList.toggle('is-admin', isAdmin);
     const addTile = isAdmin
@@ -794,21 +827,33 @@
       : '';
     if (!galleryImages.length) {
       destroySortable();
+      galleryGrid.classList.remove('is-carousel');
       galleryGrid.innerHTML = isAdmin ? addTile : '<div class="gallery-empty">Photos coming soon.</div>';
       wireAddTile();
       return;
     }
-    galleryGrid.innerHTML = galleryImages.map(g => {
-      const del = isAdmin
-        ? `<button class="img-del" data-id="${g.id}" data-path="${escapeHtml(g.path)}" title="Delete" aria-label="Delete image">&times;</button>`
-        : '';
-      return `<figure data-id="${g.id}"><img src="${publicUrl(g.path)}" alt="${escapeHtml(g.alt || 'Anthony Orciuoli gallery image')}" loading="lazy">${del}</figure>`;
-    }).join('') + addTile;
-    galleryGrid.querySelectorAll('.img-del').forEach(b => b.addEventListener('click', (e) => {
-      e.stopPropagation(); deleteImage(b.dataset.id, b.dataset.path);
-    }));
-    wireAddTile();
-    if (isAdmin) initSortable(); else destroySortable();
+
+    // Admin keeps the static grid so upload / drag-to-reorder / delete still work.
+    if (isAdmin) {
+      galleryGrid.classList.remove('is-carousel');
+      galleryGrid.innerHTML = galleryImages.map(g => figureHTML(g, true)).join('') + addTile;
+      galleryGrid.querySelectorAll('.img-del').forEach(b => b.addEventListener('click', (e) => {
+        e.stopPropagation(); deleteImage(b.dataset.id, b.dataset.path);
+      }));
+      wireAddTile();
+      initSortable();
+      return;
+    }
+
+    // Visitors get an infinitely scrolling horizontal strip across the screen.
+    destroySortable();
+    galleryGrid.classList.add('is-carousel');
+    const figures = galleryImages.map(g => figureHTML(g, false)).join('');
+    // Repeat the set so it comfortably fills wide screens, keeping the track two
+    // identical halves so the -50% keyframe loop is seamless.
+    const half = figures.repeat(Math.max(1, Math.ceil(4 / galleryImages.length)));
+    const seconds = galleryImages.length * Math.max(1, Math.ceil(4 / galleryImages.length)) * 7;
+    galleryGrid.innerHTML = `<div class="gallery-track" style="animation-duration:${seconds}s">${half}${half}</div>`;
   }
 
   async function loadGallery() {
