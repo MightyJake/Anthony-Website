@@ -354,6 +354,9 @@
   .field textarea { resize: vertical; min-height: 110px; }
   .form-msg { text-align: center; padding: 12px; border-radius: 10px; margin-top: 14px; font-size: 0.9rem; display: none; }
   .form-msg.show { display: block; background: var(--accent); color: var(--on-accent); }
+  /* On success the form is replaced by the confirmation to prevent accidental resubmits (restored on refresh). */
+  .contact-wrap.submitted > *:not(.form-msg) { display: none; }
+  .contact-wrap.submitted .form-msg { margin-top: 0; padding: 32px 20px; font-size: 1rem; }
   .contact-cta { text-align: center; margin-top: 28px; }
 
   /* ---------- FOOTER ---------- */
@@ -794,7 +797,11 @@
         body: new FormData(contactForm),
         headers: { Accept: 'application/json' }
       });
-      if (res.ok) { showFormMsg('✦ Thank you — Anthony will be in touch soon.', false); contactForm.reset(); }
+      if (res.ok) {
+        contactForm.reset();
+        showFormMsg('✦ Thank you — Anthony will be in touch soon.', false);
+        contactForm.classList.add('submitted');
+      }
       else { showFormMsg('Something went wrong — please email Anthony directly.', true); }
     } catch (err) {
       showFormMsg('Network error — please try again.', true);
