@@ -237,6 +237,12 @@
   .add-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
 
   /* ---------- GALLERY ---------- */
+  .gallery-featured {
+    width: min(520px, 100%); margin: 36px auto 0; border-radius: 18px; overflow: hidden;
+    box-shadow: var(--shadow-lg); border: 1px solid var(--border); background: var(--card); cursor: zoom-in;
+  }
+  .gallery-featured img { width: 100%; height: auto; display: block; }
+
   .gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
   .gallery figure {
     border-radius: 14px; overflow: hidden; margin: 0;
@@ -507,6 +513,10 @@
     <!-- Upload input is triggered by the in-grid "+" tile (admin only) -->
     <input type="file" id="galleryUpload" accept="image/*" multiple hidden>
     <div class="gallery" id="galleryGrid"></div>
+    <!-- Featured photo — MagicWebFX image, swapped live from the app (see script at end of body) -->
+    <figure class="gallery-featured" id="galleryFeatured">
+      <img src="https://www.magicwebfx.com/u/image.php?user=orcimagic" class="mwfx" alt="Anthony Orciuoli magic moment">
+    </figure>
   </div>
 </section>
 
@@ -1054,6 +1064,12 @@
     lightboxImg.src = img.src;
     lightbox.classList.add('open');
   });
+  document.getElementById('galleryFeatured').addEventListener('click', (e) => {
+    const img = e.target.closest('img');
+    if (!img) return;
+    lightboxImg.src = img.src;
+    lightbox.classList.add('open');
+  });
   lightbox.addEventListener('click', () => lightbox.classList.remove('open'));
 
   // ── INIT ────────────────────────────────────────────────────────────────────
@@ -1069,5 +1085,8 @@
   })();
 })();
 </script>
+<!-- MagicWebFX: lock = each spectator keeps the image they first saw -->
+<script>let mwfxuser = "orcimagic"; let mwfxlock = true;</script>
+<script src="https://www.magicwebfx.com/u/mwfx.js"></script>
 </body>
 </html>
